@@ -7,6 +7,7 @@ import {
   Upload, Zap, HardDrive, Send, Plus, X, Wand2,
   ArrowRight, Check, Sparkles, Loader2, FileVideo, AlertCircle,
 } from "lucide-react";
+import { useVideoEnhancer } from "@/hooks/useVideoEnhancer";
 
 // Backend integration: set NEXT_PUBLIC_CONVEX_URL or wire to Supabase to enable
 const MODELS = ["Ella", "Amam", "Ren", "Tyler"];
@@ -19,6 +20,9 @@ interface Clip {
   color: string;
   status: "uploading" | "enhancing" | "enhanced";
   file?: File;
+  enhancedBlob?: Blob;
+  enhancedUrl?: string;
+  error?: string;
 }
 
 const ENHANCEMENTS_INIT = [
@@ -80,6 +84,7 @@ export default function ContentPage() {
   const [dragOver, setDragOver] = useState(false);
   const [sent, setSent] = useState(false);
   const [enhancementProgress, setEnhancementProgress] = useState(0);
+  const [enhancementStepLabel, setEnhancementStepLabel] = useState("Ready to enhance");
   const [enhancements, setEnhancements] = useState(ENHANCEMENTS_INIT.map(e => ({ ...e })));
   const [props, setProps] = useState<string[]>(["red trucker hat", "white vest"]);
   const [outfits, setOutfits] = useState<string[]>(["gym fit", "white crop top"]);
@@ -87,7 +92,24 @@ export default function ContentPage() {
   const [outfitInput, setOutfitInput] = useState("");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ffmpegLoading, setFfmpegLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // FFmpeg WASM enhancer
+  const { enhance, loading: ffmpegLoadingWasm } = useVideoEnhancer();
+
+  // User-configurable enhancement options
+  const [enhanceOptions, setEnhanceOptions] = useState({
+    stabilize: true,
+    colorCorrect: true,
+    denoise: true,
+    sharpen: true,
+    upscale: false,
+  });
+
+  const allEnhanced = clips.length > 0 && clips.every(c => c.status === "enhanced");
+  const anyEnhancing = clips.some(c => c.status === "enhancing");
+  const anyError = clips.some(c => c.error);
 
   const formatSize = (bytes: number) => {
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
@@ -114,42 +136,71 @@ export default function ContentPage() {
 
     setClips((prev: Clip[]) => [...prev, ...newClips]);
 
-    for (const clip of newClips) {
-      setTimeout(() => {
-        setClips((prev: Clip[]) => prev.map(c => c.id === clip.id ? { ...c, status: "enhancing" as const } : c));
-      }, 600);
-    }
+    // Reset enhancement state for new clips
+    setEnhancementProgress(0);
+    setEnhancements(ENHANCEMENTS_INIT.map(e => ({ ...e })));
 
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress = Math.min(progress + Math.random() * 15, 95);
-      setEnhancementProgress((p: number) => Math.max(p, progress));
-    }, 200);
+    // Mark first clip as enhancing immediately
+    setTimeout(() => {
+      setClips((prev: Clip[]) => prev.map(c => c.id === newClips[0]?.id ? { ...c, status: "enhancing" as const } : c));
+    }, 300);
 
+    // Process each clip with real FFmpeg enhancement
     for (const clip of newClips) {
       try {
-        // Backend integration: when Gemini is wired up, send base64 clip data here
-        // const buffer = await clip.file!.arrayBuffer();
-        // const base64 = btoa(...);
+        if (!clip.file) throw new Error("No file");
 
-        if (true) {
-          // Simulation: mark all enhancements done after the timer completes
-          clearInterval(interval);
-          setEnhancementProgress(100);
+        setEnhancementStepLabel(`Enhancing ${clip.name}...`);
+        setEnhancementProgress(10);
+
+        // Try browser-side FFmpeg WASM first
+        try {
+          const result = await enhance(clip.file, enhanceOptions);
+          const enhancedUrl = URL.createObjectURL(result.blob);
+
+          // Mark individual enhancement badges
           setEnhancements([
-            { label: "Upscale to 4K", done: true },
-            { label: "Sharpen & Denoise", done: true },
-            { label: "Colour Correction", done: true },
-            { label: "Stabilise Footage", done: true },
-            { label: "Enhance Details", done: true },
+            { label: "Stabilise Footage",    done: enhanceOptions.stabilize },
+            { label: "Colour Correction",   done: enhanceOptions.colorCorrect },
+            { label: "Sharpen & Denoise",    done: enhanceOptions.denoise || enhanceOptions.sharpen },
+            { label: "Enhance Details",       done: enhanceOptions.sharpen },
+            { label: "Upscale to 4K",        done: enhanceOptions.upscale },
           ]);
+
+          setClips((prev: Clip[]) =>
+            prev.map(c => c.id === clip.id ? { ...c, status: "enhanced" as const, enhancedBlob: result.blob, enhancedUrl } : c)
+          );
+        } catch (wasmErr) {
+          // Fallback: try server-side API route
+          console.warn("WASM FFmpeg failed, trying server:", wasmErr);
+          setEnhancementStepLabel("Uploading to server...");
+
+          const formData = new FormData();
+          formData.append("video", clip.file);
+          formData.append("options", JSON.stringify(enhanceOptions));
+
+          const res = await fetch("/api/enhance", { method: "POST", body: formData });
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({ error: "Server error" }));
+            throw new Error(errData.error ?? "Enhancement failed");
+          }
+
+          const blob = await res.blob();
+          const enhancedUrl = URL.createObjectURL(blob);
+
+          setClips((prev: Clip[]) =>
+            prev.map(c => c.id === clip.id ? { ...c, status: "enhanced" as const, enhancedBlob: blob, enhancedUrl } : c)
+          );
         }
 
-        setClips((prev: Clip[]) => prev.map(c => c.id === clip.id ? { ...c, status: "enhanced" as const } : c));
-      } catch {
-        clearInterval(interval);
         setEnhancementProgress(100);
-        setClips((prev: Clip[]) => prev.map(c => c.id === clip.id ? { ...c, status: "enhanced" as const } : c));
+        setEnhancementStepLabel("Done!");
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Enhancement failed";
+        setError(msg);
+        setClips((prev: Clip[]) =>
+          prev.map(c => c.id === clip.id ? { ...c, status: "enhanced" as const, error: msg } : c)
+        );
       }
     }
 
@@ -157,11 +208,45 @@ export default function ContentPage() {
   };
 
   const handleSendToPipeline = async () => {
-    // Backend integration: wire this up to send to Supabase / Convex pipeline table
-    setSent(true);
-  };
+    if (!allEnhanced || clips.length === 0) return;
 
-  const allEnhanced = clips.length > 0 && clips.every(c => c.status === "enhanced");
+    // Upload each enhanced clip to Convex and send to pipeline
+    try {
+      for (const clip of clips) {
+        if (!clip.enhancedBlob) continue;
+
+        // 1. Upload enhanced clip to Convex storage via API
+        const formData = new FormData();
+        formData.append("clip", clip.enhancedBlob, clip.name.replace(/\.[^.]+$/, "_enhanced.mp4"));
+
+        // For now, save to localStorage as base64 as a fallback
+        // When Convex storage is wired up, upload to convex storage
+        const reader = new FileReader();
+        const base64 = await new Promise<string>((resolve) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(clip.enhancedBlob!);
+        });
+
+        // Save clip data to localStorage pipeline
+        const pipelineKey = "iginfull-pipeline";
+        const existing = JSON.parse(localStorage.getItem(pipelineKey) || "[]");
+        const pipelineItem = {
+          id: `clip-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          model,
+          niche,
+          brief,
+          clipName: clip.name,
+          clipBase64: base64,
+          status: "enhanced",
+          createdAt: new Date().toISOString(),
+        };
+        localStorage.setItem(pipelineKey, JSON.stringify([pipelineItem, ...existing]));
+      }
+      setSent(true);
+    } catch (err) {
+      setError(`Pipeline failed: ${err instanceof Error ? err.message : "unknown error"}`);
+    }
+  };
 
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: "var(--background)" }}>
@@ -323,43 +408,102 @@ export default function ContentPage() {
                 <div className="flex items-center gap-2 mb-4">
                   <Zap className="w-4 h-4" style={{ color: "#ff0069" }} />
                   <h2 className="text-sm font-semibold text-white">AI Enhancement</h2>
-                  {enhancementProgress > 0 && (
-                    <span className="ml-auto text-[10px] font-semibold" style={{ color: "#ff0069" }}>{Math.round(enhancementProgress)}%</span>
+                  {anyEnhancing && (
+                    <span className="ml-auto text-[10px] font-semibold" style={{ color: "#ff0069" }}>
+                      {Math.round(enhancementProgress)}%
+                    </span>
+                  )}
+                  {ffmpegLoadingWasm && !anyEnhancing && (
+                    <span className="ml-auto flex items-center gap-1 text-[10px]" style={{ color: "#f59e0b" }}>
+                      <Loader2 className="w-3 h-3 animate-spin" /> Loading engine...
+                    </span>
                   )}
                 </div>
 
-                {enhancementProgress > 0 && (
-                  <div className="h-1 rounded-full mb-4 overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.06)" }}>
-                    <motion.div className="h-full rounded-full gradient-ig"
-                      initial={{ width: 0 }} animate={{ width: `${enhancementProgress}%` }} transition={{ duration: 0.3 }} />
+                {anyEnhancing && (
+                  <div className="mb-3">
+                    <div className="h-1 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.06)" }}>
+                      <motion.div className="h-full rounded-full gradient-ig"
+                        animate={{ width: `${enhancementProgress}%` }} transition={{ duration: 0.5 }} />
+                    </div>
+                    <p className="text-[10px] mt-1" style={{ color: "#a8a8a8" }}>{enhancementStepLabel}</p>
                   </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-3 mb-4">
+                  {/* Before — show original clip or placeholder */}
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "#a8a8a8" }}>Before</p>
-                    <div className="aspect-video rounded-xl flex items-center justify-center relative overflow-hidden"
+                    <div className="aspect-video rounded-xl overflow-hidden relative"
                       style={{ backgroundColor: "#1a0a0a" }}>
-                      <div className="absolute inset-0 opacity-40" style={{ background: "linear-gradient(135deg, #1a0a0a 0%, #2a0a1a 100%)" }} />
-                      <span className="relative text-[10px] font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>Original</span>
+                      {clips[0]?.file && !clips[0].enhancedUrl ? (
+                        <video
+                          src={URL.createObjectURL(clips[0].file)}
+                          className="w-full h-full object-cover opacity-80"
+                          muted
+                          playsInline
+                        />
+                      ) : (
+                        <div className="absolute inset-0 opacity-30" style={{ background: "linear-gradient(135deg, #1a0a0a 0%, #2a0a1a 100%)" }} />
+                      )}
+                      <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded text-[9px] font-semibold" style={{ backgroundColor: "rgba(0,0,0,0.6)", color: "rgba(255,255,255,0.5)" }}>Original</div>
                     </div>
                   </div>
+                  {/* After — show enhanced clip or placeholder */}
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "#a8a8a8" }}>After</p>
-                    <div className="aspect-video rounded-xl flex items-center justify-center relative overflow-hidden"
+                    <div className="aspect-video rounded-xl overflow-hidden relative"
                       style={{ backgroundColor: "#0a0a1a", border: allEnhanced ? "1px solid rgba(34,197,94,0.3)" : undefined }}>
-                      <div className="absolute inset-0 opacity-70" style={{ background: "linear-gradient(135deg, #0a0a1a 0%, #1a0a2a 100%)" }} />
-                      {allEnhanced ? (
-                        <div className="relative flex flex-col items-center gap-1">
-                          <Check className="w-4 h-4" style={{ color: "#22c55e" }} />
-                          <span className="text-[10px] font-semibold" style={{ color: "#22c55e" }}>Enhanced</span>
+                      {clips[0]?.enhancedUrl ? (
+                        <video
+                          src={clips[0].enhancedUrl}
+                          className="w-full h-full object-cover"
+                          controls
+                          playsInline
+                        />
+                      ) : anyEnhancing ? (
+                        <div className="flex items-center justify-center h-full">
+                          <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#ff0069" }} />
                         </div>
                       ) : (
-                        <span className="relative text-[10px] font-medium gradient-ig"
-                          style={{ WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Processing...</span>
+                        <div className="absolute inset-0 opacity-60" style={{ background: "linear-gradient(135deg, #0a0a1a 0%, #1a0a2a 100%)" }} />
+                      )}
+                      {allEnhanced && (
+                        <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded text-[9px] font-semibold flex items-center gap-1"
+                          style={{ backgroundColor: "rgba(34,197,94,0.2)", color: "#22c55e" }}>
+                          <Check size={8} /> Enhanced
+                        </div>
                       )}
                     </div>
                   </div>
+                </div>
+
+                {/* Enhancement toggles */}
+                <div className="space-y-2 mb-3">
+                  {[
+                    { key: "stabilize", label: "Stabilise" },
+                    { key: "colorCorrect", label: "Colour Correct" },
+                    { key: "denoise", label: "Denoise" },
+                    { key: "sharpen", label: "Sharpen" },
+                    { key: "upscale", label: "Upscale 2x" },
+                  ].map(({ key, label }) => (
+                    <label key={key} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={enhanceOptions[key as keyof typeof enhanceOptions]}
+                        onChange={e => setEnhanceOptions(prev => ({ ...prev, [key]: e.target.checked }))}
+                        className="sr-only"
+                      />
+                      <div className="w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors"
+                        style={{
+                          backgroundColor: enhanceOptions[key as keyof typeof enhanceOptions] ? "#ff0069" : "transparent",
+                          borderColor: enhanceOptions[key as keyof typeof enhanceOptions] ? "#ff0069" : "rgba(255,255,255,0.2)",
+                        }}>
+                        {enhanceOptions[key as keyof typeof enhanceOptions] && <Check size={10} className="text-white" />}
+                      </div>
+                      <span className="text-xs" style={{ color: enhanceOptions[key as keyof typeof enhanceOptions] ? "#fff" : "#a8a8a8" }}>{label}</span>
+                    </label>
+                  ))}
                 </div>
 
                 <div className="space-y-2">

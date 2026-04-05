@@ -517,7 +517,33 @@ export default function IdeasPage() {
     setSelectedId(null);
 
     try {
-      const generated = await generateMockBriefs(niche, model, style, campaign);
+      // Try Gemini API first
+      let generated: GeneratedBrief[] = [];
+      try {
+        const res = await fetch("/api/generate-ideas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ model, niche, style, campaign }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          generated = data.briefs.map((b: any, i: number) => ({
+            id: `gemini-${Date.now()}-${i}`,
+            ...b,
+            status: "draft" as const,
+          }));
+        } else {
+          console.warn("Gemini API error, falling back to mock:", await res.text());
+        }
+      } catch (apiErr) {
+        console.warn("Gemini API unreachable, using mock generation:", apiErr);
+      }
+
+      // Fallback to mock generation if API failed or returned nothing
+      if (generated.length === 0) {
+        generated = await generateMockBriefs(niche, model, style, campaign);
+      }
+
       setBriefs(prev => [...generated, ...prev]);
       setSelectedId(generated[0].id);
       setGenerationDone(true);
