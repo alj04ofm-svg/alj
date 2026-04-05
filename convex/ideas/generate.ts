@@ -1,3 +1,4 @@
+"use node";
 import { mutation, v } from "../_generated/server";
 
 export const generate = mutation({

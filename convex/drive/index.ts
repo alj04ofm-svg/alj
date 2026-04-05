@@ -1,4 +1,4 @@
-import { mutation, query } from "../_generated";
+import { mutation, query } from "../_generated/server";
 import { v } from "convex/values";
 
 // ─── Token helpers ────────────────────────────────────────────────────────────
