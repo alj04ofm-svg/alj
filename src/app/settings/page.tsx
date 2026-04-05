@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -26,6 +26,8 @@ import {
   Gift,
   FileText,
   Download,
+  Loader2,
+  X,
 } from "lucide-react";
 
 type Tab = "profile" | "accounts" | "integrations" | "content" | "team" | "billing";
@@ -136,15 +138,155 @@ function ProfileTab() {
   );
 }
 
+// ─── Drive Config Modal ────────────────────────────────────────────────────────
+
+interface DriveAccount {
+  handle: string;
+  name: string;
+  followers: string;
+  connected: boolean;
+  driveConnected?: boolean;
+  driveFolderId?: string | null;
+  modelId?: string;
+}
+
+function DriveConfigModal({
+  account,
+  onClose,
+  onConfigured,
+}: {
+  account: DriveAccount;
+  onClose: () => void;
+  onConfigured: (folderId: string) => void;
+}) {
+  const [folderId, setFolderId] = useState(account.driveFolderId ?? "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSave = async () => {
+    if (!folderId.trim()) { setError("Paste a Drive Folder ID"); return; }
+    setSaving(true);
+    setError("");
+    try {
+      const res = await fetch("/api/drive/configure", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ modelId: account.modelId, tokens: null, folderId: folderId.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      onConfigured(folderId.trim());
+    } catch (err: any) {
+      setError(err.message ?? "Something went wrong");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative w-full max-w-md rounded-2xl p-6 border"
+        style={{ backgroundColor: "var(--card)", borderColor: "rgba(255,255,255,0.1)" }}
+      >
+        <button onClick={onClose} className="absolute top-4 right-4 text-white/40 hover:text-white">
+          <X size={16} />
+        </button>
+
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(66,133,244,0.15)" }}>
+            <FolderOpen size={20} style={{ color: "#4285f4" }} />
+          </div>
+          <div>
+            <h3 className="text-white font-semibold">Configure Google Drive</h3>
+            <p className="text-xs" style={{ color: "#a8a8a8" }}>{account.handle}</p>
+          </div>
+        </div>
+
+        <p className="text-sm mb-4" style={{ color: "#a8a8a8" }}>
+          Enter the <strong className="text-white">Drive Folder ID</strong> for this account. Videos in this folder will auto-sync and be analyzed by Gemini.
+        </p>
+
+        <div className="mb-2">
+          <p className="text-xs uppercase tracking-wider mb-2" style={{ color: "#a8a8a8" }}>Folder ID</p>
+          <input
+            value={folderId}
+            onChange={e => setFolderId(e.target.value)}
+            placeholder="e.g. 1X2Y3Z4abcDEFghijK"
+            className="w-full px-3 py-2.5 rounded-xl text-sm text-white outline-none"
+            style={{ backgroundColor: "#1e1e1e", border: "1px solid rgba(255,255,255,0.1)" }}
+          />
+        </div>
+
+        <div className="flex items-start gap-2 mb-4">
+          <FolderOpen size={12} className="mt-0.5 flex-shrink-0" style={{ color: "#4285f4" }} />
+          <p className="text-xs" style={{ color: "#a8a8a8" }}>
+            Find the ID in your Drive URL: <code className="text-white">drive.google.com/drive/folders/</code>
+            <strong className="text-white">[FOLDER_ID]</strong>
+          </p>
+        </div>
+
+        {error && (
+          <p className="text-xs mb-3 px-3 py-2 rounded-lg" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "#ef4444" }}>{error}</p>
+        )}
+
+        <div className="flex gap-3">
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl text-sm text-white border" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50 flex items-center justify-center gap-2"
+            style={{ background: saving ? "#333" : "linear-gradient(135deg, #4285f4, #34a853)" }}
+          >
+            {saving ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : "Save Folder"}
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 // ─── Connected Accounts Tab ───────────────────────────────────────────────────
 
+// These IDs match what you'll create in Convex models table
+const HARDCODED_ACCOUNTS: DriveAccount[] = [
+  { handle: "@abg.ricebunny", name: "Tyler",    followers: "5,340", connected: true,  modelId: "model_tyler_1"   },
+  { handle: "@onlytylerrex",  name: "Tyler Rex",followers: "1,200", connected: true,  modelId: "model_tyler_2"   },
+  { handle: "@rhinxrenx",     name: "Ren",       followers: "3,100", connected: true,  modelId: "model_ren_1"      },
+  { handle: "@ellamara",      name: "Ella",      followers: "2,800", connected: false, modelId: "model_ella_1"     },
+];
+
 function ConnectedAccountsTab() {
-  const accounts = [
-    { handle: "@abg.ricebunny", name: "Tyler",    followers: "5,340", connected: true  },
-    { handle: "@onlytylerrex",  name: "Tyler Rex",followers: "1,200", connected: true  },
-    { handle: "@rhinxrenx",     name: "Ren",       followers: "3,100", connected: true  },
-    { handle: "@ellamira",      name: "Ella",      followers: "2,800", connected: false },
-  ];
+  const [accounts, setAccounts] = useState<DriveAccount[]>(HARDCODED_ACCOUNTS);
+  const [configModal, setConfigModal] = useState<DriveAccount | null>(null);
+  const [driveTokens, setDriveTokens] = useState<Record<string, any>>({});
+
+  // Read OAuth callback params from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const connected = params.get("drive_connected");
+    const modelId = params.get("modelId");
+    const tokensB64 = params.get("tokens");
+    const driveError = params.get("drive_error");
+
+    if (driveError) {
+      console.warn("Drive OAuth error:", driveError);
+    }
+
+    if (connected && modelId && tokensB64) {
+      try {
+        const tokens = JSON.parse(atob(tokensB64));
+        setDriveTokens(prev => ({ ...prev, [modelId]: tokens }));
+        // Clean URL
+        window.history.replaceState({}, "", "/settings");
+      } catch {}
+    }
+  }, []);
 
   return (
     <motion.div
@@ -161,47 +303,101 @@ function ConnectedAccountsTab() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {accounts.map((acc) => (
-          <div
-            key={acc.handle}
-            className="rounded-xl p-5 border"
-            style={{ backgroundColor: "var(--card)", borderColor: "rgba(255,255,255,0.08)" }}
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full gradient-ig flex items-center justify-center text-white text-xs font-bold">
-                  {acc.name.charAt(0)}
+        {accounts.map((acc) => {
+          const hasTokens = !!driveTokens[acc.modelId ?? acc.handle];
+          const isDriveConfigured = acc.driveFolderId || hasTokens;
+          return (
+            <div
+              key={acc.handle}
+              className="rounded-xl p-5 border"
+              style={{ backgroundColor: "var(--card)", borderColor: "rgba(255,255,255,0.08)" }}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full gradient-ig flex items-center justify-center text-white text-xs font-bold">
+                    {acc.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="text-white font-medium text-sm">{acc.handle}</p>
+                    <p className="text-xs" style={{ color: "#a8a8a8" }}>{acc.name}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-white font-medium text-sm">{acc.handle}</p>
-                  <p className="text-xs" style={{ color: "#a8a8a8" }}>{acc.name}</p>
+                <span
+                  className="text-xs px-2 py-0.5 rounded-full font-medium"
+                  style={{
+                    backgroundColor: acc.connected ? "rgba(34,197,94,0.15)" : "rgba(255,166,0,0.15)",
+                    color: acc.connected ? "#22c55e" : "#ffa600",
+                  }}
+                >
+                  {acc.connected ? "Connected" : "Not Connected"}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs" style={{ color: "#a8a8a8" }}>{acc.followers} followers</p>
+                {acc.connected ? (
+                  <span className="flex items-center gap-1 text-xs" style={{ color: "#22c55e" }}>
+                    <Check size={12} /> Active
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-xs" style={{ color: "#ffa600" }}>
+                    <AlertCircle size={12} /> Reconnect
+                  </span>
+                )}
+              </div>
+
+              {/* Drive row */}
+              <div className="flex items-center justify-between pt-3 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                <div className="flex items-center gap-2">
+                  <FolderOpen size={14} style={{ color: isDriveConfigured ? "#4285f4" : "#555" }} />
+                  <span className="text-xs" style={{ color: isDriveConfigured ? "#a8a8a8" : "#555" }}>
+                    {isDriveConfigured ? "Drive synced" : "Drive not set up"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {isDriveConfigured && (
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#22c55e" }} />
+                  )}
+                  <button
+                    onClick={() => setConfigModal(acc)}
+                    className="text-xs px-2.5 py-1 rounded-lg font-medium text-white"
+                    style={{
+                      background: isDriveConfigured
+                        ? "rgba(66,133,244,0.15)"
+                        : "linear-gradient(135deg, #4285f4, #34a853)",
+                    }}
+                  >
+                    {isDriveConfigured ? "Configure" : "Set up"}
+                  </button>
                 </div>
               </div>
-              <span
-                className="text-xs px-2 py-0.5 rounded-full font-medium"
-                style={{
-                  backgroundColor: acc.connected ? "rgba(34,197,94,0.15)" : "rgba(255,166,0,0.15)",
-                  color: acc.connected ? "#22c55e" : "#ffa600",
-                }}
-              >
-                {acc.connected ? "Connected" : "Not Connected"}
-              </span>
             </div>
-            <div className="flex items-center justify-between">
-              <p className="text-xs" style={{ color: "#a8a8a8" }}>{acc.followers.toLocaleString()} followers</p>
-              {acc.connected ? (
-                <span className="flex items-center gap-1 text-xs" style={{ color: "#22c55e" }}>
-                  <Check size={12} /> Active
-                </span>
-              ) : (
-                <span className="flex items-center gap-1 text-xs" style={{ color: "#ffa600" }}>
-                  <AlertCircle size={12} /> Reconnect
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+
+      {configModal && (
+        <DriveConfigModal
+          account={configModal}
+          onClose={() => setConfigModal(null)}
+          onConfigured={(folderId) => {
+            setAccounts(prev =>
+              prev.map(a => a.handle === configModal.handle ? { ...a, driveFolderId: folderId } : a)
+            );
+            // If we have OAuth tokens from callback, save them now
+            const tokens = driveTokens[configModal.modelId ?? configModal.handle];
+            if (tokens) {
+              fetch("/api/drive/configure", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ modelId: configModal.modelId, tokens, folderId }),
+              }).then(() => setConfigModal(null));
+            } else {
+              setConfigModal(null);
+            }
+          }}
+        />
+      )}
 
       <button className="w-full py-3 rounded-xl text-white font-medium text-sm gradient-ig flex items-center justify-center gap-2">
         <Plus size={16} />
@@ -213,12 +409,60 @@ function ConnectedAccountsTab() {
 
 // ─── Integrations Tab ─────────────────────────────────────────────────────────
 
-function IntegrationsTab() {
+function IntegrationsTab({ modelId }: { modelId?: string }) {
+  const [driveConnected, setDriveConnected] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("drive_connected") === "true") {
+      setDriveConnected(true);
+      window.history.replaceState({}, "", "/settings");
+    }
+  }, []);
+
+  const handleConnectDrive = () => {
+    const id = modelId ?? "model_tyler_1";
+    window.location.href = `/api/auth/google-drive?modelId=${id}`;
+  };
+
   const integrations = [
-    { name: "Google Drive",  status: true,  lastSynced: "2h ago", icon: <FolderOpen   size={20} style={{ color: "#4285f4" }} />, note: "Auto-sync clips to Drive" },
-    { name: "Airtable",       status: true,  lastSynced: "1h ago", icon: <Zap          size={20} style={{ color: "#ff0069" }} />, note: "Pipeline & content management" },
-    { name: "Telegram Bot",   status: true,  lastSynced: "5m ago", icon: <Globe        size={20} style={{ color: "#0088cc" }} />, note: "@NVTIMEBOT" },
-    { name: "Meta Graph API", status: false, lastSynced: null,     icon: <ExternalLink size={20} style={{ color: "#833ab4" }} />, note: "Post scheduling & insights" },
+    {
+      name: "Google Drive",
+      status: driveConnected,
+      lastSynced: "—",
+      icon: <FolderOpen size={20} style={{ color: "#4285f4" }} />,
+      note: "Auto-sync clips from Drive — per-account folder config in Connected Accounts",
+      connectedLabel: "Active",
+      action: driveConnected ? "Configure" : null,
+    },
+    {
+      name: "Airtable",
+      status: true,
+      lastSynced: "1h ago",
+      icon: <Zap size={20} style={{ color: "#ff0069" }} />,
+      note: "Pipeline & content management",
+      connectedLabel: "Connected",
+      action: "Configure",
+    },
+    {
+      name: "Telegram Bot",
+      status: true,
+      lastSynced: "5m ago",
+      icon: <Globe size={20} style={{ color: "#0088cc" }} />,
+      note: "@NVTIMEBOT — clip received & approval notifications",
+      connectedLabel: "Connected",
+      action: "Configure",
+    },
+    {
+      name: "Meta Graph API",
+      status: false,
+      lastSynced: null,
+      icon: <ExternalLink size={20} style={{ color: "#833ab4" }} />,
+      note: "Post scheduling & real Instagram analytics",
+      connectedLabel: null,
+      action: null,
+    },
   ];
 
   return (
@@ -259,11 +503,12 @@ function IntegrationsTab() {
                       <p className="text-xs" style={{ color: "#a8a8a8" }}>Last synced</p>
                       <p className="text-xs text-white">{intg.lastSynced}</p>
                     </div>
-                    {/* Breathing glow dot */}
                     <span className="connected-glow relative w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#22c55e" }} />
-                    <button className="text-xs px-3 py-1.5 rounded-lg border text-white" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-                      Configure
-                    </button>
+                    {intg.action && (
+                      <button className="text-xs px-3 py-1.5 rounded-lg border text-white" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                        {intg.action}
+                      </button>
+                    )}
                   </>
                 ) : (
                   <>
@@ -271,9 +516,14 @@ function IntegrationsTab() {
                       style={{ backgroundColor: "rgba(255,166,0,0.15)", color: "#ffa600" }}>
                       Not Connected
                     </span>
-                    <button className="text-xs px-3 py-1.5 rounded-lg text-white font-medium"
-                      style={{ background: "linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcaf45 100%)" }}>
-                      Connect
+                    <button
+                      onClick={intg.name === "Google Drive" ? handleConnectDrive : undefined}
+                      disabled={connecting}
+                      className="text-xs px-3 py-1.5 rounded-lg text-white font-medium disabled:opacity-50 flex items-center gap-1.5"
+                      style={{ background: "linear-gradient(135deg, #4285f4, #34a853)" }}
+                    >
+                      {connecting ? <Loader2 size={12} className="animate-spin" /> : null}
+                      {connecting ? "Connecting..." : "Connect"}
                     </button>
                   </>
                 )}
@@ -584,7 +834,7 @@ export default function SettingsPage() {
   const tabComponents: Record<Tab, React.ReactNode> = {
     profile:       <ProfileTab />,
     accounts:      <ConnectedAccountsTab />,
-    integrations:  <IntegrationsTab />,
+    integrations:  <IntegrationsTab modelId="model_tyler_1" />,
     content:       <ContentDefaultsTab />,
     team:          <TeamTab />,
     billing:       <BillingTab />,

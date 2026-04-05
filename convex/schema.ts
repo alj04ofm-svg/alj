@@ -8,6 +8,8 @@ export default defineSchema({
     instagramHandle: v.string(),
     avatarUrl: v.optional(v.string()),
     status: v.string(),
+    googleDriveTokens: v.optional(v.string()), // JSON: { access_token, refresh_token, expiry }
+    driveFolderId: v.optional(v.string()),
   }).index("by_name", (r) => r.name),
 
   ideas: defineTable({
@@ -34,6 +36,7 @@ export default defineSchema({
     mimeType: v.string(),
     fileSize: v.optional(v.number()),
     createdAt: v.number(),
+    driveFileId: v.optional(v.string()), // Google Drive file ID if synced from Drive
   })
     .index("by_idea", (r) => r.ideaId)
     .index("by_status", (r) => r.status),

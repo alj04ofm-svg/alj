@@ -105,50 +105,50 @@
     radial-gradient(ellipse 40% 40% at 50% 50%, rgba(60, 0, 140, 0.06) 0%, transparent 60%);
 }
 
-/* ═══ LIGHT MODE — Soft Lavender/Pink ═══ */
+/* ═══ LIGHT MODE — Instagram warm cream/orange/purple ═══ */
 [data-theme="light"] {
-  --background: #f7f0ff;
-  --foreground: #1e0040;
+  --background: #faf8f6;
+  --foreground: #2c1810;
   --card: #ffffff;
-  --card-foreground: #1e0040;
-  --popover: #fdf4ff;
-  --popover-foreground: #1e0040;
-  --primary: #c4006a;
+  --card-foreground: #2c1810;
+  --popover: #fff8f5;
+  --popover-foreground: #2c1810;
+  --primary: #ff0069;
   --primary-foreground: #ffffff;
-  --secondary: #f0e6ff;
-  --secondary-foreground: #1e0040;
-  --muted: #ede0ff;
-  --muted-foreground: #7b3faa;
-  --accent: #9b4dca;
+  --secondary: #fff0ec;
+  --secondary-foreground: #2c1810;
+  --muted: #fff5f0;
+  --muted-foreground: #a85470;
+  --accent: #833ab4;
   --accent-foreground: #ffffff;
   --destructive: #ef4444;
-  --border: rgba(155, 77, 202, 0.14);
-  --input: rgba(155, 77, 202, 0.07);
-  --ring: #c4006a;
-  --chart-1: #c4006a;
-  --chart-2: #e07b00;
-  --chart-3: #9b4dca;
-  --chart-4: #ff5fa0;
-  --chart-5: #5a9e6f;
+  --border: rgba(255, 107, 92, 0.12);
+  --input: rgba(255, 107, 92, 0.07);
+  --ring: #ff0069;
+  --chart-1: #ff0069;
+  --chart-2: #fcaf45;
+  --chart-3: #833ab4;
+  --chart-4: #fd1d1d;
+  --chart-5: #78c257;
   --radius: 0.75rem;
-  --sidebar: #f0e6ff;
-  --sidebar-foreground: #1e0040;
-  --sidebar-primary: #c4006a;
+  --sidebar: #fdf2ee;
+  --sidebar-foreground: #2c1810;
+  --sidebar-primary: #ff0069;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e8d5ff;
-  --sidebar-accent-foreground: #1e0040;
-  --sidebar-border: rgba(155, 77, 202, 0.10);
-  --sidebar-ring: #c4006a;
-  --nav-bg: 247, 240, 255;
+  --sidebar-accent: #fff0ec;
+  --sidebar-accent-foreground: #2c1810;
+  --sidebar-border: rgba(255, 107, 92, 0.08);
+  --sidebar-ring: #ff0069;
+  --nav-bg: 250, 248, 246;
 }
 
-/* Light mode page gradient — soft lavender atmospheric glow */
+/* Light mode — clean warm gradient, no heavy purple */
 [data-theme="light"] body {
-  background-color: #f7f0ff;
+  background-color: #faf8f6;
   background-image:
-    radial-gradient(ellipse 80% 50% at 0% 0%, rgba(200, 80, 240, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(155, 77, 202, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(220, 160, 255, 0.05) 0%, transparent 60%);
+    radial-gradient(ellipse 80% 50% at 0% 0%, rgba(255, 107, 92, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(131, 58, 180, 0.05) 0%, transparent 50%);
+  background-attachment: fixed;
 }
 
 @layer base {
@@ -184,20 +184,22 @@
     );
   }
 
-  /* Scroll fade on light mode — soft lavender atmospheric glow */
+  /* Scroll fade on light mode — warm orange/purple */
   [data-theme="light"] body::before {
     background: linear-gradient(
       to bottom,
-      rgba(200, 80, 240, 0.18) 0%,
-      rgba(160, 60, 200, 0.08) 50%,
+      rgba(255, 107, 92, 0.10) 0%,
+      rgba(131, 58, 180, 0.06) 40%,
       transparent 100%
     );
   }
 }
 
-/* Smooth theme transitions */
-html { transition: background-color 0.4s ease, color 0.4s ease; }
-* { transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
+/* Smooth theme transitions — fast, no flicker */
+html { transition: background-color 0.15s ease, color 0.15s ease; }
+[data-theme="light"] *, [data-theme="dark"] * {
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
 
 /* ═══ Utility Classes ══════════════════════════════════════════════════ */
 @layer utilities {
@@ -345,7 +347,7 @@ html { transition: background-color 0.4s ease, color 0.4s ease; }
 /* ─── ScrollReveal Polish ─────────────────────────────────── */
 [data-theme="light"] .glow-active-pulse { animation: glow-active-pulse-light 2.4s ease-in-out infinite; }
 @keyframes glow-active-pulse-light {
-  0%,100% { box-shadow: 0 0 8px rgba(196,0,106,0.3), inset 0 0 8px rgba(196,0,106,0.08); }
-  50% { box-shadow: 0 0 16px rgba(196,0,106,0.6), inset 0 0 12px rgba(196,0,106,0.15); }
+  0%,100% { box-shadow: 0 0 8px rgba(255,0,105,0.25), inset 0 0 8px rgba(255,0,105,0.08); }
+  50% { box-shadow: 0 0 16px rgba(255,0,105,0.5), inset 0 0 12px rgba(255,0,105,0.15); }
 }
-[data-theme="light"] .glow-nav-item:hover { box-shadow: -3px 0 20px rgba(196,0,106,0.25); }
+[data-theme="light"] .glow-nav-item:hover { box-shadow: -3px 0 20px rgba(255,0,105,0.25); }

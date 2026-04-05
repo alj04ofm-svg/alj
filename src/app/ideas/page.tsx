@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Wand2, Send, Plus, X, Check, Edit3, ArrowRight,
   Loader2, RefreshCw, MessageSquare, Camera, Type, Hash, Film, Star,
+  FolderOpen,
 } from "lucide-react";
 
 // ── Seed models (Yssa is VA, not a model) ──────────────────────────────
@@ -25,6 +26,8 @@ interface GeneratedBrief {
   onScreenText: string;
   endShot: string;
   captionSuggestion: string;
+  caption: string;
+  isDriveIdea?: boolean;
   hashtags: string[];
   model: string;
   niche: string;
@@ -50,6 +53,7 @@ const SEED_BRIEFS: GeneratedBrief[] = [
     onScreenText: "photo day 🐰",
     endShot: "Standing in front of mirror flexing confidently",
     captionSuggestion: "Carbs? In THIS economy? 📦😂",
+    caption: "Carbs? In THIS economy? 📦😂",
     hashtags: ["#Tyler", "#Fitness", "#GymLife", "#ThirstTrap", "#GymReels", "#PhotoDay"],
     model: "Tyler", niche: "Fitness", style: "POV Story", campaign: "April 2026",
     status: "ready", createdAt: "Just now",
@@ -68,6 +72,7 @@ const SEED_BRIEFS: GeneratedBrief[] = [
     onScreenText: "he texts back 🖤",
     endShot: "Hair flip, deadpan stare at camera",
     captionSuggestion: "He texts back. I'm still unbothered 🖤",
+    caption: "He texts back. I'm still unbothered 🖤",
     hashtags: ["#Ella", "#GFE", "#POV", "#Unbothered", "#GFE", "#Reels"],
     model: "Ella", niche: "GFE", style: "POV Story", campaign: "Spring 2026",
     status: "sent", createdAt: "2h ago",
@@ -89,6 +94,7 @@ const MOCK_BRIEFS: Partial<GeneratedBrief>[] = [
     onScreenText: "POV: The scale doesn't lie 😭",
     endShot: "Shrug at camera, walk out",
     captionSuggestion: "POV: You can't outrun a poor diet 😂💀",
+    caption: "POV: You can't outrun a poor diet 😂💀",
     hashtags: ["#Ren", "#Fitness", "#GymReels", "#POV", "#GymLife", "#Relatable"],
   },
   {
@@ -104,6 +110,7 @@ const MOCK_BRIEFS: Partial<GeneratedBrief>[] = [
     onScreenText: "prove it 🏋️‍♀️",
     endShot: "Serious face, finger guns at camera",
     captionSuggestion: "POV: You said WHAT to me? 💅",
+    caption: "POV: You said WHAT to me? 💅",
     hashtags: ["#Tyler", "#Fitness", "#GymThirstTrap", "#POV", "#GymReels", "#Challenge"],
   },
   {
@@ -119,6 +126,7 @@ const MOCK_BRIEFS: Partial<GeneratedBrief>[] = [
     onScreenText: "it's giving main character 🖤",
     endShot: "One perfectly timed hair flip",
     captionSuggestion: "Walk in like it's a movie premiere 🎬",
+    caption: "Walk in like it's a movie premiere 🎬",
     hashtags: ["#Ella", "#GFE", "#MainCharacter", "#Confidence", "#POV", "#Reels"],
   },
 ];
@@ -168,7 +176,12 @@ function BriefCard({
         <div className="flex-1 min-w-0">
           <p className="text-white text-sm font-medium truncate">{brief.hook.split(".")[0]}</p>
           <p className="text-xs mt-0.5 truncate" style={{ color: "#a8a8a8" }}>
-            {brief.model} · {brief.niche}
+            {brief.model}{brief.niche ? ` · ${brief.niche}` : ""}
+            {brief.isDriveIdea && (
+              <span className="ml-1.5 inline-flex items-center gap-0.5" style={{ color: "#4285f4" }}>
+                <FolderOpen size={9} /> Drive
+              </span>
+            )}
           </p>
         </div>
         <span
@@ -491,7 +504,10 @@ export default function IdeasPage() {
   const [generating, setGenerating] = useState(false);
   const [generationDone, setGenerationDone] = useState(false);
 
-  const selected = briefs.find(b => b.id === selectedId) ?? null;
+  // Backend integration: wire this up to Convex / Supabase when backend is live
+  const allBriefs: GeneratedBrief[] = briefs;
+
+  const selected = allBriefs.find(b => b.id === selectedId) ?? null;
 
   const handleGenerate = async (
     niche: string, model: string, style: string, campaign: string
@@ -518,7 +534,7 @@ export default function IdeasPage() {
 
   const handleDelete = (id: string) => {
     setBriefs(prev => prev.filter(b => b.id !== id));
-    if (selectedId === id) setSelectedId(briefs.find(b => b.id !== id)?.id ?? null);
+    if (selectedId === id) setSelectedId(allBriefs.find(b => b.id !== id)?.id ?? null);
   };
 
   return (
@@ -542,12 +558,12 @@ export default function IdeasPage() {
               className="px-4 py-3 text-xs font-semibold uppercase tracking-wide flex items-center justify-between"
               style={{ color: "#a8a8a8", borderBottom: "1px solid rgba(255,255,255,0.04)" }}
             >
-              <span>{briefs.length} Brief{briefs.length !== 1 ? "s" : ""}</span>
-              <span style={{ color: "#22c55e" }}>{briefs.filter(b => b.status === "ready").length} ready</span>
+              <span>{allBriefs.length} Brief{allBriefs.length !== 1 ? "s" : ""}</span>
+              <span style={{ color: "#22c55e" }}>{allBriefs.filter(b => b.status === "ready").length} ready</span>
             </div>
             <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
               <AnimatePresence>
-                {briefs.map(b => (
+                {allBriefs.map(b => (
                   <motion.div
                     key={b.id}
                     initial={{ opacity: 0, y: 4 }}
@@ -563,7 +579,7 @@ export default function IdeasPage() {
                   </motion.div>
                 ))}
               </AnimatePresence>
-              {briefs.length === 0 && (
+              {allBriefs.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <Wand2 className="w-6 h-6 mb-2" style={{ color: "#333" }} />
                   <p className="text-xs" style={{ color: "#555" }}>Generate your first idea above</p>
@@ -642,9 +658,9 @@ export default function IdeasPage() {
 
           <div className="space-y-3">
             {[
-              { label: "Total Briefs", value: briefs.length, color: "#833ab4" },
-              { label: "Ready to Send", value: briefs.filter(b => b.status === "ready").length, color: "#ff0069" },
-              { label: "Sent to Model", value: briefs.filter(b => b.status === "sent").length, color: "#22c55e" },
+              { label: "Total Briefs", value: allBriefs.length, color: "#833ab4" },
+              { label: "Ready to Send", value: allBriefs.filter(b => b.status === "ready").length, color: "#ff0069" },
+              { label: "Sent to Model", value: allBriefs.filter(b => b.status === "sent").length, color: "#22c55e" },
             ].map(stat => (
               <div
                 key={stat.label}
@@ -665,7 +681,7 @@ export default function IdeasPage() {
             </h3>
             <div className="space-y-2">
               {MODELS.map(m => {
-                const modelBriefs = briefs.filter(b => b.model === m);
+                const modelBriefs = allBriefs.filter(b => b.model === m);
                 const sent = modelBriefs.filter(b => b.status === "sent").length;
                 return (
                   <div key={m} className="flex items-center justify-between">

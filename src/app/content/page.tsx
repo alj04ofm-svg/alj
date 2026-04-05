@@ -8,10 +8,7 @@ import {
   ArrowRight, Check, Sparkles, Loader2, FileVideo, AlertCircle,
 } from "lucide-react";
 
-// Only enable Convex when a real deployment URL is set (not a placeholder).
-// In development, `npx convex dev` automatically sets NEXT_PUBLIC_CONVEX_URL.
-const hasConvex = !!process.env.NEXT_PUBLIC_CONVEX_URL?.startsWith("http");
-
+// Backend integration: set NEXT_PUBLIC_CONVEX_URL or wire to Supabase to enable
 const MODELS = ["Ella", "Amam", "Ren", "Tyler"];
 const NICHES = ["GFE", "Fitness", "Meme", "Thirst Trap", "Lifestyle"];
 
@@ -98,7 +95,7 @@ export default function ContentPage() {
   };
 
   const addTag = (val: string, setFn: (v: string[]) => void, setInput: (v: string) => void) => {
-    if (val.trim()) { setFn((prev: string[]) => [...prev, val.trim()]); setInput(""); }
+    if (val.trim()) { (setFn as (v: string[] | ((prev: string[]) => string[])) => void)((prev: string[]) => [...prev, val.trim()]); setInput(""); }
   };
 
   const handleFiles = async (files: FileList | null) => {
@@ -131,26 +128,20 @@ export default function ContentPage() {
 
     for (const clip of newClips) {
       try {
-        const buffer = await clip.file!.arrayBuffer();
-        const base64 = btoa(new Uint8Array(buffer).reduce((data: string, byte: number) => data + String.fromCharCode(byte), ""));
+        // Backend integration: when Gemini is wired up, send base64 clip data here
+        // const buffer = await clip.file!.arrayBuffer();
+        // const base64 = btoa(...);
 
-        if (hasConvex) {
-          const { useMutation } = await import("convex/react");
-          const { api } = await import("@/convex/_generated/api");
-          const mutate = useMutation(api.content.enhance);
-          const result = await mutate({
-            clipId: undefined,
-            videoBase64: base64,
-            mimeType: clip.file!.type || "video/mp4",
-          }) as { upscaled?: boolean; denoised?: boolean; colorCorrected?: boolean; stabilized?: boolean; detailEnhanced?: boolean };
+        if (true) {
+          // Simulation: mark all enhancements done after the timer completes
           clearInterval(interval);
           setEnhancementProgress(100);
           setEnhancements([
-            { label: "Upscale to 4K", done: result?.upscaled ?? true },
-            { label: "Sharpen & Denoise", done: result?.denoised ?? true },
-            { label: "Colour Correction", done: result?.colorCorrected ?? true },
-            { label: "Stabilise Footage", done: result?.stabilized ?? true },
-            { label: "Enhance Details", done: result?.detailEnhanced ?? true },
+            { label: "Upscale to 4K", done: true },
+            { label: "Sharpen & Denoise", done: true },
+            { label: "Colour Correction", done: true },
+            { label: "Stabilise Footage", done: true },
+            { label: "Enhance Details", done: true },
           ]);
         }
 
@@ -166,13 +157,8 @@ export default function ContentPage() {
   };
 
   const handleSendToPipeline = async () => {
+    // Backend integration: wire this up to send to Supabase / Convex pipeline table
     setSent(true);
-    if (hasConvex) {
-      const { useMutation } = await import("convex/react");
-      const { api } = await import("@/convex/_generated/api");
-      const sendPipeline = useMutation(api.pipeline.sendToPipeline);
-      await sendPipeline({}).catch(() => {});
-    }
   };
 
   const allEnhanced = clips.length > 0 && clips.every(c => c.status === "enhanced");

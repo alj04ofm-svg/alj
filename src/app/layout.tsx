@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { CategoryProvider } from "@/components/providers/CategoryProvider";
+import { ConvexProviderWrapper } from "@/components/providers/ConvexProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,7 +55,9 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <CategoryProvider>
-            {children}
+            <ConvexProviderWrapper>
+              {children}
+            </ConvexProviderWrapper>
           </CategoryProvider>
         </ThemeProvider>
       </body>

@@ -55,6 +55,14 @@ const REEL_THUMBS = [
   "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=320&h=400&fit=crop",
 ];
 
+// ── Pipeline: read briefs sent from Ideas page ───────────────────────
+const PIPELINE_KEY = "iginfull-pipeline";
+
+function loadPipeline() {
+  if (typeof window === "undefined") return [];
+  try { return JSON.parse(localStorage.getItem(PIPELINE_KEY) || "[]"); } catch { return []; }
+}
+
 // ── Reel ideas per model ────────────────────────────────────────────────────────
 const REEL_IDEAS = [
   // Tyler — Easter batch
@@ -194,9 +202,41 @@ export default function ModelsPage() {
   const [selectedId, setSelectedId] = useState<string>("m1");
   const [activeTab, setActiveTab] = useState<string>("All");
   const [refreshing, setRefreshing] = useState(false);
+  const [pipelineItems, setPipelineItems] = useState<ReturnType<typeof loadPipeline>>([]);
+
+  // Load pipeline from localStorage on mount
+  const [, forceRefresh] = useState(0);
+  useState(() => {
+    setPipelineItems(loadPipeline());
+  });
+
+  const refresh = () => {
+    setRefreshing(true);
+    setPipelineItems(loadPipeline());
+    forceRefresh(n => n + 1);
+    setTimeout(() => setRefreshing(false), 400);
+  };
+
+  // Build combined reels: SEED data + pipeline items from Ideas page
+  const allReels = [
+    ...pipelineItems.map((p: { _id: string; modelId: string; modelName?: string; hook?: string; niche?: string; campaign?: string; steps?: string[]; caption?: string; hashtags?: string[]; status?: string; sentAt?: string; thumb?: string }) => ({
+      _id: p._id,
+      modelId: p.modelId,
+      hook: p.hook,
+      niche: p.niche || p.hook?.split(":")[0] || "",
+      campaign: p.campaign || "",
+      steps: p.steps || [],
+      caption: p.caption || "",
+      hashtags: p.hashtags || [],
+      status: (p.status || "sent") as typeof REEL_IDEAS[0]["status"],
+      sentAt: p.sentAt || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      thumb: p.thumb || REEL_THUMBS[0],
+    })),
+    ...REEL_IDEAS,
+  ];
 
   const model = MODELS.find(m => m._id === selectedId)!;
-  const modelIdeas = REEL_IDEAS.filter(i => i.modelId === selectedId);
+  const modelIdeas = allReels.filter(i => i.modelId === selectedId);
   const filtered = activeTab === "All" ? modelIdeas : modelIdeas.filter(i => {
     if (activeTab === "Filming") return i.status === "in_progress";
     if (activeTab === "Sent") return i.status === "sent";
@@ -225,7 +265,7 @@ export default function ModelsPage() {
                 <Users2 className="w-4 h-4" style={{ color: "#ff0069" }} />
                 <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#ff0069" }}>Team</span>
               </div>
-              <button onClick={() => { setRefreshing(true); setTimeout(() => setRefreshing(false), 600); }}
+              <button onClick={refresh}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all hover:opacity-80"
                 style={{ backgroundColor: "rgba(255,255,255,0.06)", color: "#a8a8a8", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} /> Refresh
