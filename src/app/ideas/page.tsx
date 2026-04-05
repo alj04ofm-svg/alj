@@ -2,7 +2,6 @@
 export const dynamic = "force-dynamic";
 
 import { useState } from "react";
-import { useAction } from "convex/react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -10,7 +9,7 @@ import {
   Loader2, RefreshCw, MessageSquare, Camera, Type, Hash, Film, Star,
   FolderOpen,
 } from "lucide-react";
-import { api } from "@/lib/convex";
+// Convex removed — all ideas generated via /api/generate-ideas (Next.js API route)
 
 // ── Seed models (Yssa is VA, not a model) ──────────────────────────────
 const MODELS = ["Tyler", "Ren", "Ella", "Amam"];
@@ -507,9 +506,6 @@ export default function IdeasPage() {
   const [generationDone, setGenerationDone] = useState(false);
 
   // Real Convex action — calls Gemini directly via Convex action (Node.js)
-  const doGenerateAction = useAction(api.ideas.generate as any);
-
-  // Backend integration: wire this up to Convex / Supabase when backend is live
   const allBriefs: GeneratedBrief[] = briefs;
 
   const selected = allBriefs.find(b => b.id === selectedId) ?? null;
@@ -522,38 +518,8 @@ export default function IdeasPage() {
     setSelectedId(null);
 
     try {
-      // Try real Convex action first (runs Gemini in Convex's Node.js environment)
+      // Ideas are generated via /api/generate-ideas (Next.js API route → Gemini)
       let generated: GeneratedBrief[] = [];
-      try {
-        const result = await doGenerateAction({
-          niche,
-          model,
-          style,
-          props: [],
-          outfits: [],
-          campaign: campaign || "Untitled Campaign",
-          count: 3,
-        });
-        console.log("Convex generate result:", result);
-        if (Array.isArray(result) && result.length > 0) {
-          generated = result.map((b: any, i: number) => ({
-            id: `gemini-${Date.now()}-${i}`,
-            hook: b.hook ?? "",
-            steps: Array.isArray(b.steps) ? b.steps : [],
-            camera: b.camera ?? "eye level, phone selfie",
-            onScreenText: b.onScreenText ?? "(none)",
-            endShot: b.endShot ?? "Confident look at camera",
-            captionSuggestion: b.captionSuggestion ?? b.caption ?? b.hook ?? "",
-            caption: b.caption ?? b.captionSuggestion ?? b.hook ?? "",
-            hashtags: Array.isArray(b.hashtags) ? b.hashtags.slice(0, 8) : [`#${model}`, `#${niche}`, "#Reels"],
-            model, niche, style, campaign,
-            createdAt: "Just now",
-            status: "ready" as const,
-          }));
-        }
-      } catch (actionErr) {
-        console.warn("Convex action failed, trying Next.js API route:", actionErr);
-      }
 
       // Fallback: Next.js API route → Gemini (if Convex action not available)
       if (generated.length === 0) {
