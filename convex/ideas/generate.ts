@@ -1,4 +1,4 @@
-use node;
+"use node";
 import { mutation } from "../_generated/server.js";
 import { v } from "convex/values";
 

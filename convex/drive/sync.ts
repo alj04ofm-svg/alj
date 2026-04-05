@@ -1,4 +1,4 @@
-use node;
+"use node";
 import { internalMutation, internalQuery } from "../_generated/server.js";
 import { v } from "convex/values";
 
@@ -28,7 +28,7 @@ async function getValidTokens(
 }
 
 // ─── Scheduled function — runs every 15 minutes ──────────────────────────────
-import { schedule } from "convex/server";
+import { schedule } from "convex/server/cron";
 
 /**
  * autoSync — scheduled function. Must be registered in convex.config.ts.
