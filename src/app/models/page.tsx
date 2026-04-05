@@ -1,7 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/layout/Sidebar";
 import {
@@ -206,9 +206,18 @@ export default function ModelsPage() {
 
   // Load pipeline from localStorage on mount
   const [, forceRefresh] = useState(0);
-  useState(() => {
+  useEffect(() => {
     setPipelineItems(loadPipeline());
-  });
+  }, []);
+
+  // Auto-refresh pipeline when Ideas page saves new items
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPipelineItems(loadPipeline());
+      forceRefresh(n => n + 1);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   const refresh = () => {
     setRefreshing(true);

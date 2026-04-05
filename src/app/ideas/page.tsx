@@ -547,6 +547,7 @@ export default function IdeasPage() {
             caption: b.caption ?? b.captionSuggestion ?? b.hook ?? "",
             hashtags: Array.isArray(b.hashtags) ? b.hashtags.slice(0, 8) : [`#${model}`, `#${niche}`, "#Reels"],
             model, niche, style, campaign,
+            createdAt: "Just now",
             status: "ready" as const,
           }));
         }
@@ -570,6 +571,7 @@ export default function IdeasPage() {
               id: `gemini-${Date.now()}-${i}`,
               ...b,
               model, niche, style, campaign,
+              createdAt: "Just now",
               status: "ready" as const,
             }));
           } else {
