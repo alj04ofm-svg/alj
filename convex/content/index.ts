@@ -1,4 +1,4 @@
-import { mutation, v } from "../_generated";
+import { mutation, v } from "../_generated/server";
 
 export const enhance = mutation({
   args: {

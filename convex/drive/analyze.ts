@@ -1,3 +1,4 @@
+"use node";
 import { mutation } from "../_generated";
 import { v } from "convex/values";
 import { GoogleGenerativeAI } from "@google/generative-ai";

@@ -1,4 +1,4 @@
-import { query, v } from "../_generated";
+import { query, v } from "../_generated/server";
 
 export const list = query({
   args: { modelId: v.optional(v.string()) },

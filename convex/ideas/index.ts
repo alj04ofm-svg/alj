@@ -1,4 +1,4 @@
-import { query, mutation, v } from "../_generated";
+import { query, mutation, v } from "../_generated/server";
 
 export const list = query({
   args: {
