@@ -92,7 +92,6 @@ export default function ContentPage() {
   const [outfitInput, setOutfitInput] = useState("");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [ffmpegLoading, setFfmpegLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // FFmpeg WASM enhancer
