@@ -11,95 +11,6 @@ interface GenerateRequest {
   campaign: string;
 }
 
-function buildPrompt(req: GenerateRequest): string {
-  return `You are a content strategist for Instagram Reels. Generate 3 highly detailed content briefs for a model with the following profile:
-
-Model: ${req.model}
-Niche: ${req.niche}
-Style: ${req.style}
-Campaign: ${req.campaign || "Untitled Campaign"}
-
-For EACH of the 3 briefs, return EXACTLY this structure:
-
-## BRIEF [number]
-HOOK: [One compelling hook line — short, punchy, makes someone stop scrolling]
-STEPS: [4-6 specific filming steps, numbered, clear and actionable. Include camera setup, what to show on screen, what to say or do at camera, and how long each part should be]
-CAMERA: [Camera angle, height, framing, and lighting setup in one sentence]
-ON_SCREEN_TEXT: [Short text overlay that appears during the reel, max 6 words]
-END_SHOT: [What to show in the final 2 seconds — the hook, the brand, the vibe]
-CAPTION: [Suggested caption, max 150 chars, punchy and engagement-driving]
-HASHTAGS: [exactly 6 hashtags, format: #Tag1 #Tag2 #Tag3 #Tag4 #Tag5 #Tag6]
-
-Rules:
-- Steps must be specific enough that any model could film them without additional questions
-- Include ring light ON/OFF instructions in steps
-- HOOK must be under 12 words
-- HASHTAGS must include the model name and niche
-- End Shot must leave the viewer wanting more
-- CAMERA and ON_SCREEN_TEXT must be usable without editing knowledge
-- CAPTION must feel natural, not over-optimized
-
-Respond ONLY with the 3 briefs in this exact format. No preamble, no explanation.`;
-}
-
-interface ParsedBrief {
-  hook: string;
-  steps: string[];
-  camera: string;
-  onScreenText: string;
-  endShot: string;
-  caption: string;
-  hashtags: string[];
-}
-
-function parseGeminiResponse(text: string, req: GenerateRequest): ParsedBrief[] {
-  const briefs: ParsedBrief[] = [];
-  const sections = text.split("## BRIEF");
-
-  for (const section of sections) {
-    if (!section.trim()) continue;
-
-    const get = (key: string): string => {
-      const match = section.match(new RegExp(`${key}:\\s*([\\s\\S]*?)(?=\\n[A-Z_]+:|\\n\\n|$)`, "i"));
-      return match ? match[1].trim() : "";
-    };
-
-    const hook = get("HOOK");
-    const camera = get("CAMERA");
-    const onScreenText = get("ON_SCREEN_TEXT");
-    const endShot = get("END_SHOT");
-    const caption = get("CAPTION");
-
-    const stepsMatch = section.match(/STEPS:([\s\S]*?)(?=CAMERA:|$)/i);
-    const stepsRaw = stepsMatch ? stepsMatch[1] : "";
-    const steps = stepsRaw
-      .split(/\n\d+[\.\)]\s*/)
-      .map(s => s.trim())
-      .filter(s => s.length > 10);
-
-    const hashtagsMatch = section.match(/HASHTAGS:\s*([^\n]+)/i);
-    const hashtagsRaw = hashtagsMatch ? hashtagsMatch[1] : "";
-    const hashtags = hashtagsRaw
-      .split(/\s+/)
-      .filter(t => t.startsWith("#"))
-      .slice(0, 8);
-
-    if (hook && steps.length > 0) {
-      briefs.push({
-        hook,
-        steps,
-        camera: camera || "eye level, phone selfie, natural lighting",
-        onScreenText: onScreenText || hook.split(" ").slice(0, 4).join(" "),
-        endShot: endShot || "Confident look at camera",
-        caption: caption || hook,
-        hashtags: hashtags.length > 0 ? hashtags : [`#${req.model}`, `#${req.niche}`, "#Reels", "#Content"],
-      });
-    }
-  }
-
-  return briefs;
-}
-
 export async function POST(req: NextRequest) {
   try {
     const body: GenerateRequest = await req.json();
@@ -120,7 +31,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const prompt = buildPrompt({ model, niche, style, campaign });
+    const prompt = `You are a content brief writer for Instagram Reels. Generate exactly 3 distinct, creative content briefs:
+
+Model: ${model}
+Niche: ${niche}
+Style: ${style}
+Campaign: ${campaign || "Untitled Campaign"}
+
+Return ONLY a valid JSON array of 3 objects — no markdown, no code fences, no explanation. Each object:
+{
+  "hook": "one punchy attention-grabbing sentence (under 12 words)",
+  "steps": ["numbered filming instruction 1", "step 2", "step 3", "step 4"],
+  "camera": "camera setup in one sentence",
+  "onScreenText": "text overlay, max 6 words, or \"(none)\"",
+  "endShot": "what to show in the final 2 seconds",
+  "captionSuggestion": "punchy 1-2 line Instagram caption",
+  "hashtags": ["#Tag1", "#Tag2", "#Tag3", "#Tag4", "#Tag5", "#Tag6"]
+}
+
+Rules:
+- Steps must be simple enough that any model could follow them without asking questions
+- Include ring light ON/OFF in steps where relevant
+- Hashtags MUST include the model name and niche
+- End Shot must leave the viewer wanting more
+- Return ONLY the JSON array`;
 
     const geminiRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
@@ -130,6 +64,7 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
+            responseMimeType: "application/json",
             temperature: 0.9,
             maxOutputTokens: 4096,
           },
@@ -152,11 +87,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Gemini returned empty response" }, { status: 500 });
     }
 
-    const briefs = parseGeminiResponse(generatedText, body);
+    // Parse JSON directly — much more reliable than regex parsing
+    let briefs: any[];
+    try {
+      briefs = JSON.parse(generatedText);
+      if (!Array.isArray(briefs)) briefs = [briefs];
+    } catch {
+      return NextResponse.json(
+        { error: "Failed to parse Gemini response as JSON", raw: generatedText },
+        { status: 500 }
+      );
+    }
+
+    // Normalize each brief to always have captionSuggestion → caption
+    const normalized = briefs.map((b, i) => ({
+      hook: b.hook ?? "",
+      steps: Array.isArray(b.steps) ? b.steps : [],
+      camera: b.camera ?? "eye level, phone selfie, natural lighting",
+      onScreenText: b.onScreenText ?? "(none)",
+      endShot: b.endShot ?? "Confident look at camera",
+      captionSuggestion: b.captionSuggestion ?? b.caption ?? b.hook ?? "",
+      caption: b.caption ?? b.captionSuggestion ?? b.hook ?? "",
+      hashtags: Array.isArray(b.hashtags) ? b.hashtags.slice(0, 8) : [`#${model}`, `#${niche}`, "#Reels", "#Content"],
+    }));
 
     return NextResponse.json({
-      briefs,
-      raw: generatedText,
+      briefs: normalized,
       model,
       niche,
       style,
