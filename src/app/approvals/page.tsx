@@ -525,8 +525,30 @@ export default function ApprovalsPage() {
     return true;
   });
 
+  const SCHEDULE_KEY = "iginfull-schedule";
   const handleStatusChange = (id: string, status: ApprovalStatus) => {
     setItems(prev => prev.map(i => (i.id === id ? { ...i, status } : i)));
+
+    // On approve (or approve & publish), push to the schedule pipeline
+    if (status === "approved" || status === "published") {
+      const item = items.find(i => i.id === id);
+      if (item) {
+        const scheduled = {
+          id: `scheduled-${Date.now()}`,
+          contentType: item.contentType,
+          caption: item.caption,
+          hashtags: item.hashtags,
+          account: item.account,
+          accountColor: item.accountColor,
+          status: "scheduled",
+          scheduledAt: new Date().toISOString(),
+        };
+        try {
+          const existing = JSON.parse(localStorage.getItem(SCHEDULE_KEY) || "[]");
+          localStorage.setItem(SCHEDULE_KEY, JSON.stringify([scheduled, ...existing]));
+        } catch { /* non-blocking */ }
+      }
+    }
   };
 
   const TABS: { key: TabFilter; label: string }[] = [

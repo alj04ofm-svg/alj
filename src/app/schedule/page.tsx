@@ -8,7 +8,7 @@ import {
   Settings, ChevronLeft, ChevronRight, Plus, Filter,
   Image, Film, LayoutGrid, Star, Camera, Heart,
   MessageSquare, Bookmark, Eye, TrendingUp, ArrowUp, Clock, MapPin, Globe,
-  Share2, ThumbsUp, Download, X, Zap, Award, BarChart,
+  Share2, ThumbsUp, Download, X, Zap, Award, BarChart, Check,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -231,9 +231,13 @@ const fadeUp = {
 function DayDetailModal({
   dayKey,
   onClose,
+  pendingItems,
+  onAddToDay,
 }: {
   dayKey: string;
   onClose: () => void;
+  pendingItems: any[];
+  onAddToDay: (item: any) => void;
 }) {
   const example = DAY_DETAIL_EXAMPLES[dayKey] ?? {
     headline: "No posts scheduled",
@@ -269,7 +273,7 @@ function DayDetailModal({
         </div>
 
         <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
-          {example.posts.length === 0 ? (
+          {example.posts.length === 0 && pendingItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <Calendar className="w-8 h-8 mb-2" style={{ color: "#333" }} />
               <p className="text-white font-semibold">Nothing scheduled</p>
@@ -301,26 +305,60 @@ function DayDetailModal({
               </div>
             ))
           )}
+
+          {pendingItems.length > 0 && (
+            <>
+              <div className="text-xs font-semibold uppercase tracking-wide pt-2" style={{ color: "#a8a8a8", borderTop: "1px solid rgba(255,255,255,0.06)" }}>From Approvals</div>
+              {pendingItems.map((item) => (
+                <div key={item.id} className="flex items-center gap-3 p-3 rounded-xl" style={{ backgroundColor: "rgba(34,197,94,0.05)", border: "1px solid rgba(34,197,94,0.15)" }}>
+                  <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${item.accountColor ?? "#ff0069"}44, #833ab422)` }}>
+                    <Check className="w-4 h-4" style={{ color: "#22c55e" }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(34,197,94,0.12)", color: "#22c55e" }}>{item.contentType}</span>
+                      <span className="text-[10px]" style={{ color: "#a8a8a8" }}>{item.account}</span>
+                    </div>
+                    <p className="text-xs truncate" style={{ color: "#d1d1d1" }}>{item.caption?.slice(0, 60)}</p>
+                  </div>
+                  <button
+                    onClick={() => onAddToDay(item)}
+                    className="px-2 py-1 rounded-lg text-[10px] font-bold text-white flex-shrink-0 transition-all hover:brightness-110"
+                    style={{ backgroundColor: "#22c55e" }}
+                  >
+                    Add
+                  </button>
+                </div>
+              ))}
+            </>
+          )}
         </div>
 
-        {example.posts.length > 0 && (
-          <div className="p-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-            <button className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #ff0069, #fd1d1d)" }}>
-              <Plus className="w-3.5 h-3.5 inline mr-2" />Add Post to {dayKey}
-            </button>
-          </div>
-        )}
+        <div className="p-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <button className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #ff0069, #fd1d1d)" }}>
+            <Plus className="w-3.5 h-3.5 inline mr-2" />Add Post to {dayKey}
+          </button>
+        </div>
       </motion.div>
     </motion.div>
   );
 }
 
 // ─── Calendar View ────────────────────────────────────────────────────────────
+const SCHEDULE_KEY = "iginfull-schedule";
 
 function CalendarView() {
   const [contentFilter, setContentFilter] = useState<ContentFilter>("All");
   const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [pendingItems, setPendingItems] = useState<any[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(SCHEDULE_KEY) || "[]");
+      setPendingItems(stored);
+    } catch { /* non-blocking */ }
+  }, []);
 
   const contentFilters: ContentFilter[] = ["All", "Reels", "Stories", "Carousels", "Posts"];
 
@@ -435,7 +473,12 @@ function CalendarView() {
         <span className="ml-auto text-[10px]" style={{ color: "#ff0069" }}>★ Click highlighted days to see posted content</span>
       </motion.div>
 
-      <AnimatePresence>{selectedDay && <DayDetailModal dayKey={selectedDay} onClose={() => setSelectedDay(null)} />}</AnimatePresence>
+      <AnimatePresence>{selectedDay && <DayDetailModal dayKey={selectedDay} onClose={() => setSelectedDay(null)} pendingItems={pendingItems} onAddToDay={(item) => {
+        const updated = pendingItems.filter((p: any) => p.id !== item.id);
+        setPendingItems(updated);
+        localStorage.setItem(SCHEDULE_KEY, JSON.stringify(updated));
+        setSelectedDay(null);
+      }} />}</AnimatePresence>
     </div>
   );
 }
