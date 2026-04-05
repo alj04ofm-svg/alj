@@ -1,5 +1,6 @@
-"use node";
-import { mutation, v } from "convex/server";
+use node;
+import { mutation } from "../_generated/server.js";
+import { v } from "convex/values";
 
 export const generate = mutation({
   args: {

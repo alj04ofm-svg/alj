@@ -1,7 +1,6 @@
-"use node";
-import { internalMutation, internalQuery } from "convex/server";
+use node;
+import { internalMutation, internalQuery } from "../_generated/server.js";
 import { v } from "convex/values";
-import { listDriveFiles } from "./index";
 
 // ─── Internal helpers (re-use token logic from index.ts inline) ───────────────
 

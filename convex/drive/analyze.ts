@@ -1,7 +1,6 @@
-"use node";
-import { mutation } from "convex/server";
+use node;
+import { mutation } from "../_generated/server.js";
 import { v } from "convex/values";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 interface VideoAnalysisResult {
   scene_description: string;
