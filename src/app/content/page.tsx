@@ -178,7 +178,7 @@ export default function ContentPage() {
   const allEnhanced = clips.length > 0 && clips.every(c => c.status === "enhanced");
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#000000" }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: "var(--background)" }}>
       <Sidebar />
 
       <main className="flex-1 overflow-y-auto">
@@ -216,7 +216,7 @@ export default function ContentPage() {
             <div className="col-span-3 space-y-6">
 
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}
-                className="p-6 rounded-2xl" style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.08)" }}>
+                className="p-6 rounded-2xl" style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <div className="flex items-center gap-2 mb-5">
                   <Wand2 className="w-4 h-4" style={{ color: "#ff0069" }} />
                   <h2 className="text-base font-semibold text-white">What content are we making?</h2>
@@ -294,7 +294,7 @@ export default function ContentPage() {
               </motion.div>
 
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }}
-                className="p-6 rounded-2xl" style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.08)" }}>
+                className="p-6 rounded-2xl" style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <div className="flex items-center gap-2 mb-5">
                   <Upload className="w-4 h-4" style={{ color: "#ff0069" }} />
                   <h2 className="text-base font-semibold text-white">Upload Your Clips</h2>
@@ -333,7 +333,7 @@ export default function ContentPage() {
             <div className="col-span-2 space-y-4">
 
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }}
-                className="p-5 rounded-2xl" style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.06)" }}>
+                className="p-5 rounded-2xl" style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.06)" }}>
                 <div className="flex items-center gap-2 mb-4">
                   <Zap className="w-4 h-4" style={{ color: "#ff0069" }} />
                   <h2 className="text-sm font-semibold text-white">AI Enhancement</h2>
@@ -382,7 +382,7 @@ export default function ContentPage() {
               </motion.div>
 
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.25 }}
-                className="p-5 rounded-2xl" style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.06)" }}>
+                className="p-5 rounded-2xl" style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.06)" }}>
                 <div className="flex items-center gap-2 mb-4">
                   <HardDrive className="w-4 h-4" style={{ color: "#ff0069" }} />
                   <h2 className="text-sm font-semibold text-white">Google Drive</h2>
@@ -406,7 +406,7 @@ export default function ContentPage() {
               </motion.div>
 
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }}
-                className="p-5 rounded-2xl" style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.06)" }}>
+                className="p-5 rounded-2xl" style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.06)" }}>
                 <div className="flex items-center gap-2 mb-3">
                   <Send className="w-4 h-4" style={{ color: "#ff0069" }} />
                   <h2 className="text-sm font-semibold text-white">Ready to Pipeline</h2>

@@ -217,7 +217,7 @@ export default function AnalyticsPage() {
   const chartMax = Math.ceil(maxGrowth / 1000) * 1000;
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "#000000" }}>
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
       <Sidebar />
 
       {/* ── Main Content ── */}

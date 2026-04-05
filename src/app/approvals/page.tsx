@@ -327,7 +327,7 @@ function DetailModal({
 
         <div
           className="w-full max-w-2xl rounded-2xl overflow-hidden pointer-events-auto relative"
-          style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.1)" }}
+          style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.1)" }}
           onClick={e => e.stopPropagation()}
         >
           {/* Modal Header */}
@@ -538,20 +538,20 @@ export default function ApprovalsPage() {
   ];
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#000000" }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: "var(--background)" }}>
       <Sidebar />
 
       <main className="flex-1 overflow-y-auto">
         {/* Top Bar */}
         <div className="sticky top-0 z-20 px-8 py-5 flex items-center justify-between"
-          style={{ backgroundColor: "#000000", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          style={{ backgroundColor: "var(--background)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <div>
             <h1 className="text-2xl font-bold text-white">Approvals</h1>
             <p className="text-xs mt-0.5" style={{ color: "#a8a8a8" }}>PTP — Pre-Turned-Post · Client Review Portal</p>
           </div>
 
           {/* Tab filters with glowing underline */}
-          <div className="flex items-center gap-1 p-1 rounded-xl" style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="flex items-center gap-1 p-1 rounded-xl" style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.08)" }}>
             {TABS.map(({ key, label }) => (
               <button
                 key={key}
@@ -592,7 +592,7 @@ export default function ApprovalsPage() {
                 value={selectedAccount}
                 onChange={e => setSelectedAccount(e.target.value)}
                 className="appearance-none pl-3 pr-8 py-2 rounded-xl text-xs font-medium text-white outline-none cursor-pointer transition-all"
-                style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.08)" }}
+                style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.08)" }}
               >
                 {ACCOUNTS.map(a => <option key={a} value={a}>{a}</option>)}
               </select>
@@ -605,7 +605,7 @@ export default function ApprovalsPage() {
                 value={selectedType}
                 onChange={e => setSelectedType(e.target.value)}
                 className="appearance-none pl-3 pr-8 py-2 rounded-xl text-xs font-medium text-white outline-none cursor-pointer transition-all"
-                style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.08)" }}
+                style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.08)" }}
               >
                 {CONTENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
@@ -614,7 +614,7 @@ export default function ApprovalsPage() {
 
             {/* Date range */}
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium"
-              style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.08)", color: "#a8a8a8" }}>
+              style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.08)", color: "#a8a8a8" }}>
               <Calendar className="w-3.5 h-3.5" />
               <span>Last 30 days</span>
               <ChevronDown className="w-3.5 h-3.5" />

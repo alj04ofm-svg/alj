@@ -331,7 +331,7 @@ function InviteModal({ open, onClose }: { open: boolean; onClose: () => void }) 
             <div
               className="rounded-2xl border overflow-hidden"
               style={{
-                backgroundColor: "#121212",
+                backgroundColor: "var(--card)",
                 borderColor: "rgba(255,255,255,0.1)",
                 boxShadow: "0 25px 50px rgba(0,0,0,0.5)",
               }}
@@ -492,7 +492,7 @@ export default function TeamPage() {
   const [inviteOpen, setInviteOpen] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "#000000" }}>
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
       <Sidebar />
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto px-6 py-8">
@@ -552,7 +552,7 @@ export default function TeamPage() {
                   key={label}
                   className="rounded-2xl p-4 border transition-all hover:border-white/12"
                   style={{
-                    backgroundColor: "#121212",
+                    backgroundColor: "var(--card)",
                     borderColor: "rgba(255,255,255,0.08)",
                   }}
                 >
@@ -576,7 +576,7 @@ export default function TeamPage() {
                     key={member.id}
                     className="rounded-2xl p-4 border transition-all hover:border-white/12"
                     style={{
-                      backgroundColor: "#121212",
+                      backgroundColor: "var(--card)",
                       borderColor: "rgba(255,255,255,0.08)",
                     }}
                   >
@@ -657,7 +657,7 @@ export default function TeamPage() {
                     key={contact.name}
                     className="flex items-center gap-3 rounded-xl p-3 border"
                     style={{
-                      backgroundColor: "#121212",
+                      backgroundColor: "var(--card)",
                       borderColor: "rgba(255,255,255,0.06)",
                     }}
                   >
@@ -685,7 +685,7 @@ export default function TeamPage() {
               <div
                 className="rounded-2xl border overflow-hidden"
                 style={{
-                  backgroundColor: "#121212",
+                  backgroundColor: "var(--card)",
                   borderColor: "rgba(255,255,255,0.08)",
                 }}
               >
@@ -734,7 +734,7 @@ export default function TeamPage() {
               <div
                 className="rounded-2xl border overflow-hidden"
                 style={{
-                  backgroundColor: "#121212",
+                  backgroundColor: "var(--card)",
                   borderColor: "rgba(255,255,255,0.08)",
                 }}
               >

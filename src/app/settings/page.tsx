@@ -80,7 +80,7 @@ function ProfileTab() {
         <p className="text-sm" style={{ color: "#a8a8a8" }}>Manage your personal account settings.</p>
       </div>
 
-      <div className="rounded-xl p-6 border" style={{ backgroundColor: "#121212", borderColor: "rgba(255,255,255,0.08)" }}>
+      <div className="rounded-xl p-6 border" style={{ backgroundColor: "var(--card)", borderColor: "rgba(255,255,255,0.08)" }}>
         <div className="flex items-center gap-5 mb-6">
           {/* Avatar with hover rotation */}
           <div className="settings-avatar-wrapper w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-lg gradient-ig-warm">
@@ -108,7 +108,7 @@ function ProfileTab() {
         </div>
       </div>
 
-      <div className="rounded-xl p-6 border" style={{ backgroundColor: "#121212", borderColor: "rgba(255,255,255,0.08)" }}>
+      <div className="rounded-xl p-6 border" style={{ backgroundColor: "var(--card)", borderColor: "rgba(255,255,255,0.08)" }}>
         <h3 className="text-white font-medium mb-4">Notifications</h3>
         <div className="space-y-4">
           {[
@@ -165,7 +165,7 @@ function ConnectedAccountsTab() {
           <div
             key={acc.handle}
             className="rounded-xl p-5 border"
-            style={{ backgroundColor: "#121212", borderColor: "rgba(255,255,255,0.08)" }}
+            style={{ backgroundColor: "var(--card)", borderColor: "rgba(255,255,255,0.08)" }}
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
@@ -240,7 +240,7 @@ function IntegrationsTab() {
           <div
             key={intg.name}
             className="rounded-xl p-5 border"
-            style={{ backgroundColor: "#121212", borderColor: "rgba(255,255,255,0.08)" }}
+            style={{ backgroundColor: "var(--card)", borderColor: "rgba(255,255,255,0.08)" }}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -307,7 +307,7 @@ function ContentDefaultsTab() {
         <p className="text-sm" style={{ color: "#a8a8a8" }}>Set default behaviours for content generation and posting.</p>
       </div>
 
-      <div className="rounded-xl p-6 border space-y-5" style={{ backgroundColor: "#121212", borderColor: "rgba(255,255,255,0.08)" }}>
+      <div className="rounded-xl p-6 border space-y-5" style={{ backgroundColor: "var(--card)", borderColor: "rgba(255,255,255,0.08)" }}>
         <h3 className="text-white font-medium text-sm">Model & Niche</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
@@ -327,7 +327,7 @@ function ContentDefaultsTab() {
         </div>
       </div>
 
-      <div className="rounded-xl p-6 border" style={{ backgroundColor: "#121212", borderColor: "rgba(255,255,255,0.08)" }}>
+      <div className="rounded-xl p-6 border" style={{ backgroundColor: "var(--card)", borderColor: "rgba(255,255,255,0.08)" }}>
         <h3 className="text-white font-medium text-sm mb-4">AI Enhancement</h3>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -349,7 +349,7 @@ function ContentDefaultsTab() {
         </div>
       </div>
 
-      <div className="rounded-xl p-6 border space-y-4" style={{ backgroundColor: "#121212", borderColor: "rgba(255,255,255,0.08)" }}>
+      <div className="rounded-xl p-6 border space-y-4" style={{ backgroundColor: "var(--card)", borderColor: "rgba(255,255,255,0.08)" }}>
         <h3 className="text-white font-medium text-sm">Posting Defaults</h3>
         <div>
           <p className="text-xs uppercase tracking-wider mb-2" style={{ color: "#a8a8a8" }}>Default Drive Folder</p>
@@ -416,7 +416,7 @@ function TeamTab() {
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
         <table className="w-full">
           <thead>
-            <tr style={{ backgroundColor: "#1a1a1a", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+            <tr style={{ backgroundColor: "var(--card)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
               <th className="text-left px-5 py-3 text-xs uppercase tracking-wider" style={{ color: "#a8a8a8" }}>Member</th>
               <th className="text-left px-5 py-3 text-xs uppercase tracking-wider" style={{ color: "#a8a8a8" }}>Role</th>
               <th className="text-left px-5 py-3 text-xs uppercase tracking-wider" style={{ color: "#a8a8a8" }}>Access</th>
@@ -527,7 +527,7 @@ function BillingTab() {
       </div>
 
       <div className="rounded-xl border overflow-hidden" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-        <div className="px-5 py-4" style={{ backgroundColor: "#121212", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="px-5 py-4" style={{ backgroundColor: "var(--card)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <h3 className="text-white font-medium text-sm">Invoice History</h3>
         </div>
         <table className="w-full">
@@ -561,7 +561,7 @@ function BillingTab() {
         </table>
       </div>
 
-      <div className="rounded-xl p-5 border flex items-center gap-4" style={{ backgroundColor: "#121212", borderColor: "rgba(255,255,255,0.08)" }}>
+      <div className="rounded-xl p-5 border flex items-center gap-4" style={{ backgroundColor: "var(--card)", borderColor: "rgba(255,255,255,0.08)" }}>
         <div className="w-10 h-10 rounded-full gradient-ig flex items-center justify-center flex-shrink-0">
           <Gift size={18} className="text-white" />
         </div>
@@ -591,7 +591,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#000000" }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: "var(--background)" }}>
       <Sidebar />
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto px-6 py-8">
@@ -600,7 +600,7 @@ export default function SettingsPage() {
               {/* Tab Sidebar */}
               <div className="sm:w-52 flex-shrink-0">
                 <div className="rounded-xl border overflow-hidden sticky top-6"
-                  style={{ backgroundColor: "#121212", borderColor: "rgba(255,255,255,0.08)" }}>
+                  style={{ backgroundColor: "var(--card)", borderColor: "rgba(255,255,255,0.08)" }}>
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}

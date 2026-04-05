@@ -169,7 +169,7 @@ function CalendarView() {
             <div
               key={label}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
-              style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.06)" }}
+              style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.06)" }}
             >
               <span className="text-white font-semibold">{count}</span>
               <span className="text-slate-400">{label}</span>
@@ -185,7 +185,7 @@ function CalendarView() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          <div className="flex items-center gap-1 p-1 rounded-lg" style={{ backgroundColor: "#121212" }}>
+          <div className="flex items-center gap-1 p-1 rounded-lg" style={{ backgroundColor: "var(--card)" }}>
             <Filter className="w-3.5 h-3.5 text-slate-400 ml-2" />
             {contentFilters.map((f) => (
               <button
@@ -223,7 +223,7 @@ function CalendarView() {
         </button>
       </motion.div>
 
-      <motion.div variants={fadeUp} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "#121212" }}>
+      <motion.div variants={fadeUp} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "var(--card)" }}>
         <div className="grid grid-cols-7 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
             <div key={day} className="py-3 text-center text-xs font-medium text-slate-400">{day}</div>
@@ -309,7 +309,7 @@ function AnalyticsView() {
 
   return (
     <div className="space-y-5">
-      <motion.div variants={fadeUp} className="flex items-center gap-4 p-5 rounded-2xl" style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.06)" }}>
+      <motion.div variants={fadeUp} className="flex items-center gap-4 p-5 rounded-2xl" style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.06)" }}>
         <div
           className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-bold flex-shrink-0"
           style={{ background: "linear-gradient(135deg, #833ab4, #ff0069)", color: "#fff" }}
@@ -343,7 +343,7 @@ function AnalyticsView() {
           <div
             key={label}
             className="p-4 rounded-xl scan-on-hover transition-all hover:border-[rgba(255,0,105,0.2)]"
-            style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.06)" }}
+            style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.06)" }}
           >
             <div className="text-xs text-slate-400 mb-1">{label}</div>
             <div className="text-xl font-bold text-white mb-1">{value}</div>
@@ -357,7 +357,7 @@ function AnalyticsView() {
         ))}
       </motion.div>
 
-      <motion.div variants={fadeUp} className="p-5 rounded-2xl" style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.06)" }}>
+      <motion.div variants={fadeUp} className="p-5 rounded-2xl" style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="flex items-center justify-between mb-5">
           <div>
             <h3 className="text-sm font-semibold text-white mb-0.5">Engagement This Week</h3>
@@ -382,13 +382,13 @@ function AnalyticsView() {
         </div>
       </motion.div>
 
-      <motion.div variants={fadeUp} className="p-5 rounded-2xl" style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.06)" }}>
+      <motion.div variants={fadeUp} className="p-5 rounded-2xl" style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="flex items-center justify-between mb-5">
           <div>
             <h3 className="text-sm font-semibold text-white mb-0.5">Top Posts</h3>
             <p className="text-xs text-slate-400">Your best performing content this month</p>
           </div>
-          <div className="flex items-center gap-1 p-1 rounded-lg" style={{ backgroundColor: "#000000" }}>
+          <div className="flex items-center gap-1 p-1 rounded-lg" style={{ backgroundColor: "var(--background)" }}>
             {topFilters.map((f) => (
               <button
                 key={f}
@@ -411,7 +411,7 @@ function AnalyticsView() {
               key={post.id}
               whileHover={{ y: -3, transition: { duration: 0.2 } }}
               className="rounded-xl overflow-hidden cursor-pointer"
-              style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "#0e0e0e" }}
+              style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "var(--card)" }}
             >
               <div className="relative">
                 <div className="aspect-square" style={{ backgroundColor: post.thumbnailColor }} />
@@ -456,7 +456,7 @@ export default function SchedulePage() {
   const [activeTab, setActiveTab] = useState<Tab>("calendar");
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "#000000" }}>
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
       <Sidebar />
 
       <main className="flex-1 overflow-y-auto relative">
@@ -474,7 +474,7 @@ export default function SchedulePage() {
               <p className="text-sm text-slate-400">Plan, schedule, and manage your content calendar.</p>
             </motion.div>
 
-            <motion.div variants={fadeUp} className="flex items-center gap-1 p-1 rounded-xl mb-6 w-fit" style={{ backgroundColor: "#121212" }}>
+            <motion.div variants={fadeUp} className="flex items-center gap-1 p-1 rounded-xl mb-6 w-fit" style={{ backgroundColor: "var(--card)" }}>
               {(["calendar", "analytics"] as Tab[]).map((tab) => (
                 <button
                   key={tab}

@@ -93,6 +93,7 @@
   --sidebar-accent-foreground: #ede0ff;
   --sidebar-border: rgba(140, 60, 220, 0.10);
   --sidebar-ring: #ff0069;
+  --nav-bg: 15, 0, 40;
 }
 
 /* Page background gradient overlay */
@@ -138,6 +139,7 @@
   --sidebar-accent-foreground: #1e0040;
   --sidebar-border: rgba(155, 77, 202, 0.10);
   --sidebar-ring: #c4006a;
+  --nav-bg: 247, 240, 255;
 }
 
 /* Light mode page gradient — soft lavender atmospheric glow */

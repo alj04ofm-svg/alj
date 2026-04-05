@@ -125,7 +125,7 @@ function ReelCard({ idea }: { idea: typeof REEL_IDEAS[0] }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="rounded-2xl overflow-hidden transition-all" style={{ backgroundColor: "#0e0e0e", border: "1px solid rgba(255,255,255,0.07)" }}>
+    <div className="rounded-2xl overflow-hidden transition-all" style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.07)" }}>
       {/* Header — always visible */}
       <button onClick={() => setExpanded(e => !e)} className="w-full text-left p-3 flex items-start gap-3 hover:bg-white/3 transition-colors">
         {/* Thumbnail */}
@@ -213,7 +213,7 @@ export default function ModelsPage() {
   const active = modelIdeas.filter(i => !["complete","draft"].includes(i.status)).length;
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#000000" }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: "var(--background)" }}>
       <Sidebar />
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto px-8 py-10">
@@ -244,7 +244,7 @@ export default function ModelsPage() {
               { label: "Completed",         value: done,   color: "#22c55e", icon: CheckCircle },
             ].map(stat => (
               <div key={stat.label} className="p-4 rounded-xl flex items-center gap-3"
-                style={{ backgroundColor: "#0e0e0e", border: "1px solid rgba(255,255,255,0.07)" }}>
+                style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.07)" }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${stat.color}18` }}>
                   <stat.icon className="w-4 h-4" style={{ color: stat.color }} />
                 </div>
@@ -336,7 +336,7 @@ export default function ModelsPage() {
               {filtered.length === 0 ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                   className="flex flex-col items-center justify-center py-20 rounded-2xl"
-                  style={{ backgroundColor: "#0e0e0e", border: "2px dashed rgba(255,255,255,0.06)" }}>
+                  style={{ backgroundColor: "var(--card)", border: "2px dashed rgba(255,255,255,0.06)" }}>
                   <Film className="w-8 h-8 mb-3" style={{ color: "#a8a8a8" }} />
                   <p className="text-white font-semibold mb-1">No ideas in this stage</p>
                   <p className="text-xs" style={{ color: "#a8a8a8" }}>Try switching the filter above</p>

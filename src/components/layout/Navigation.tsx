@@ -43,7 +43,7 @@ export function Navigation() {
       className="fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300"
       style={{
         borderColor: "var(--border)",
-        backgroundColor: "rgba(15,0,40,0.85)",
+        backgroundColor: "rgba(var(--nav-bg,15,0,40),0.88)",
         backdropFilter: "blur(20px)",
         boxShadow: scrolled ? "0 0 20px rgba(255,0,105,0.15), 0 0 40px rgba(255,0,105,0.05)" : "none",
         borderBottomColor: scrolled ? "rgba(255,0,105,0.35)" : "var(--border)",

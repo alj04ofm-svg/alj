@@ -230,7 +230,7 @@ function GenerateForm({
           value={campaign}
           onChange={e => setCampaign(e.target.value)}
           className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
-          style={{ backgroundColor: "#1a1a1a", border: "1px solid rgba(255,255,255,0.08)", color: "white" }}
+          style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.08)", color: "white" }}
           placeholder="e.g. April 2026, Spring Drop..."
         />
       </div>
@@ -522,7 +522,7 @@ export default function IdeasPage() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "#000000" }}>
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
       <Sidebar />
       <div className="flex-1 flex min-w-0 overflow-hidden">
 
@@ -619,7 +619,7 @@ export default function IdeasPage() {
             <div className="flex flex-col items-center justify-center h-full text-center">
               <div
                 className="w-20 h-20 rounded-3xl flex items-center justify-center mb-5"
-                style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.06)" }}
+                style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.06)" }}
               >
                 <Sparkles className="w-8 h-8" style={{ color: "#333" }} />
               </div>
