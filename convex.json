@@ -1,0 +1,4 @@
+{
+  "node": "convex",
+  "functions": "convex/**/*.ts"
+}
