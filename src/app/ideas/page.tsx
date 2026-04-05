@@ -2,6 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { useState } from "react";
+import { useAction } from "convex/react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -9,6 +10,7 @@ import {
   Loader2, RefreshCw, MessageSquare, Camera, Type, Hash, Film, Star,
   FolderOpen,
 } from "lucide-react";
+import { api } from "@/lib/convex";
 
 // ── Seed models (Yssa is VA, not a model) ──────────────────────────────
 const MODELS = ["Tyler", "Ren", "Ella", "Amam"];
@@ -504,6 +506,9 @@ export default function IdeasPage() {
   const [generating, setGenerating] = useState(false);
   const [generationDone, setGenerationDone] = useState(false);
 
+  // Real Convex action — calls Gemini directly via Convex action (Node.js)
+  const doGenerateAction = useAction(api.ideas.generate as any);
+
   // Backend integration: wire this up to Convex / Supabase when backend is live
   const allBriefs: GeneratedBrief[] = briefs;
 
@@ -517,31 +522,65 @@ export default function IdeasPage() {
     setSelectedId(null);
 
     try {
-      // Try Gemini API first
+      // Try real Convex action first (runs Gemini in Convex's Node.js environment)
       let generated: GeneratedBrief[] = [];
       try {
-        const res = await fetch("/api/generate-ideas", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ model, niche, style, campaign }),
+        const result = await doGenerateAction({
+          niche,
+          model,
+          style,
+          props: [],
+          outfits: [],
+          campaign: campaign || "Untitled Campaign",
+          count: 3,
         });
-        const text = await res.text();
-        console.log("[/api/generate-ideas] status:", res.status, "body:", text);
-        if (res.ok) {
-          const data = JSON.parse(text);
-          generated = data.briefs.map((b: any, i: number) => ({
+        console.log("Convex generate result:", result);
+        if (Array.isArray(result) && result.length > 0) {
+          generated = result.map((b: any, i: number) => ({
             id: `gemini-${Date.now()}-${i}`,
-            ...b,
-            status: "draft" as const,
+            hook: b.hook ?? "",
+            steps: Array.isArray(b.steps) ? b.steps : [],
+            camera: b.camera ?? "eye level, phone selfie",
+            onScreenText: b.onScreenText ?? "(none)",
+            endShot: b.endShot ?? "Confident look at camera",
+            captionSuggestion: b.captionSuggestion ?? b.caption ?? b.hook ?? "",
+            caption: b.caption ?? b.captionSuggestion ?? b.hook ?? "",
+            hashtags: Array.isArray(b.hashtags) ? b.hashtags.slice(0, 8) : [`#${model}`, `#${niche}`, "#Reels"],
+            model, niche, style, campaign,
+            status: "ready" as const,
           }));
-        } else {
-          console.warn("Gemini API error, falling back to mock:", text);
         }
-      } catch (apiErr) {
-        console.warn("Gemini API unreachable, using mock generation:", apiErr);
+      } catch (actionErr) {
+        console.warn("Convex action failed, trying Next.js API route:", actionErr);
       }
 
-      // Fallback to mock generation if API failed or returned nothing
+      // Fallback: Next.js API route → Gemini (if Convex action not available)
+      if (generated.length === 0) {
+        try {
+          const res = await fetch("/api/generate-ideas", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ model, niche, style, campaign }),
+          });
+          const text = await res.text();
+          console.log("[/api/generate-ideas] status:", res.status, "body:", text);
+          if (res.ok) {
+            const data = JSON.parse(text);
+            generated = data.briefs.map((b: any, i: number) => ({
+              id: `gemini-${Date.now()}-${i}`,
+              ...b,
+              model, niche, style, campaign,
+              status: "ready" as const,
+            }));
+          } else {
+            console.warn("Next.js API route also failed:", text);
+          }
+        } catch (apiErr) {
+          console.warn("Next.js API route unreachable:", apiErr);
+        }
+      }
+
+      // Last fallback: local mock
       if (generated.length === 0) {
         generated = await generateMockBriefs(niche, model, style, campaign);
       }
