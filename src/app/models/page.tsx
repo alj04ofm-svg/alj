@@ -1,590 +1,206 @@
 "use client";
+export const dynamic = "force-dynamic";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Sidebar } from "@/components/layout/Sidebar";
 import {
-  Users2, Send, Upload, FolderOpen, Wand2, Plus, Play, CheckCircle2,
-  Clock, Film, UploadCloud, HardDrive, ArrowRight, Check,
-  X, ChevronRight, ChevronLeft, MessageSquare, AlertCircle
+  Users2, CheckCircle, Clock, Film, ChevronRight,
+  ExternalLink, Loader2, RefreshCw,
 } from "lucide-react";
 
-interface Model {
-  id: string;
-  name: string;
-  handle: string;
-  initials: string;
-  color: string;
-}
-
-interface Reel {
-  id: string;
-  title: string;
-  category: string;
-  niche: string;
-  model: Model;
-  status: "pending" | "filmed" | "uploaded" | "drive";
-  instructions: string;
-  props: string;
-  outfit: string;
-  created: string;
-}
-
-interface DriveFile {
-  id: string;
-  name: string;
-  model: Model;
-  size: string;
-  uploaded: string;
-  synced: string;
-  gradient: string;
-}
-
-const MODELS: Model[] = [
-  { id: "m1", name: "Tyler", handle: "@abg.ricebunny", initials: "T", color: "#ff0069" },
-  { id: "m2", name: "Ren", handle: "@rhinxrenx", initials: "R", color: "#833ab4" },
-  { id: "m3", name: "Ella", handle: "@ellamira", initials: "E", color: "#78c257" },
-];
-
-const CATEGORIES = ["All", "Home", "Gym", "Outdoor", "Studio"];
-
-const STATUS_COLORS: Record<Reel["status"], string> = {
-  pending: "#ff0069",
-  filmed: "#fcaf45",
-  uploaded: "#833ab4",
-  drive: "#78c257",
-};
-const STATUS_LABELS: Record<Reel["status"], string> = {
-  pending: "Awaiting Film",
-  filmed: "Filmed",
-  uploaded: "Uploaded",
-  drive: "In Drive",
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  draft:          { label: "Draft",          color: "#a8a8a8", bg: "rgba(168,168,168,0.1)" },
+  sent:           { label: "Sent to Model",   color: "#f59e0b", bg: "rgba(245,158,11,0.1)" },
+  in_progress:    { label: "Filming",         color: "#833ab4", bg: "rgba(131,58,180,0.1)" },
+  clips_received:  { label: "Clips Back",      color: "#ff0069", bg: "rgba(255,0,105,0.1)" },
+  complete:       { label: "Complete",         color: "#22c55e", bg: "rgba(34,197,94,0.1)" },
 };
 
-const INITIAL_REELS: Reel[] = [
-  { id: "r1", title: "5AM Club Morning Routine", category: "Home", niche: "Fitness", model: MODELS[0], status: "pending", instructions: "Start in bed, alarm going off. Cut to bathroom mirror. Then kitchen making shake. Natural light preferred.", props: "Alarm clock phone, Protein shake ingredients, Gym bag packed night before", outfit: "Black sports bra + grey joggers, hair messy from sleep", created: "2h ago" },
-  { id: "r2", title: "Leg Day Drop Sets", category: "Gym", niche: "Fitness", model: MODELS[0], status: "filmed", instructions: "Dumbbells in foreground, camera slightly above. 3 quick cuts: setup, grind, pump. Finish with flex.", props: "Dumbbells 15kg pair, Gym towel, Water bottle", outfit: "Black tank top + shorts, hair in bun", created: "1d ago" },
-  { id: "r3", title: "ABG Golden Hour Edit", category: "Outdoor", niche: "Lifestyle", model: MODELS[1], status: "uploaded", instructions: "Sunglasses on, walking towards camera. Slow pan. Two outfit changes. End on car shot.", props: "Sunglasses, Two outfits (street + dress), Car in background", outfit: "Outfit 1: White tee + denim shorts. Outfit 2: Mini dress + heels.", created: "3d ago" },
-  { id: "r4", title: "Protein Smoothie Recipe", category: "Home", niche: "Fitness", model: MODELS[2], status: "pending", instructions: "Ingredients laid out first. Blender action shots. Pour into glass. Sip + smile at camera.", props: "Blender, Banana, berries, protein powder, Nice glass + straw", outfit: "Casual loungewear, hair down, natural makeup", created: "5h ago" },
-  { id: "r5", title: "Gym Bag Essentials", category: "Gym", niche: "Fitness", model: MODELS[0], status: "pending", instructions: "Bag on floor, unpack it one item at a time. Highlight the protein powder and headphones. Quick cuts.", props: "Gym bag, Protein powder, Headphones, Lock, Towel", outfit: "Pre-gym fit: black sports bra + leggings", created: "8h ago" },
-  { id: "r6", title: "Studio Light Test Loop", category: "Studio", niche: "Lifestyle", model: MODELS[1], status: "drive", instructions: "Stand in centre. Three rotations. 10 seconds each. Full body + close up face.", props: "Ring light setup, White backdrop", outfit: "White cropped tee + baggy jeans", created: "2d ago" },
-  { id: "r7", title: "Outdoor Sunset Vibes", category: "Outdoor", niche: "Lifestyle", model: MODELS[2], status: "pending", instructions: "Golden hour. Sitting on wall, looking away. Cut to standing, walking. Three angles total.", props: "Beanie optional, Oversized jacket", outfit: "Beige oversized jacket, black jeans, white sneakers", created: "6h ago" },
-  { id: "r8", title: "Shoulders + Arms Pump", category: "Gym", niche: "Fitness", model: MODELS[0], status: "drive", instructions: "Dumbbell shoulder press foreground. Camera slightly low angle. Three sets, 8 reps each. Finish pump pose.", props: "Dumbbells 10kg pair, Gym mirror in background", outfit: "Purple sports bra + black leggings", created: "4d ago" },
+// ── Seed data (until Convex is wired up) ────────────────────────────────
+const SEED_MODELS = [
+  { _id: "m1", name: "Tyler",  niche: "Fitness", instagramHandle: "@abg.ricebunny" },
+  { _id: "m2", name: "Ren",    niche: "Fitness", instagramHandle: "@rhinxrenx" },
+  { _id: "m3", name: "Ella",   niche: "GFE",     instagramHandle: "@ellamira" },
+  { _id: "m4", name: "Amam",   niche: "GFE",     instagramHandle: "@amam" },
 ];
 
-const DRIVE_FILES: DriveFile[] = [
-  { id: "d1", name: "r3_ren_golden_hour_v1.mp4", model: MODELS[1], size: "387 MB", uploaded: "1h ago", synced: "45m ago", gradient: "linear-gradient(135deg, #ff0069, #fd1d1d)" },
-  { id: "d2", name: "r3_ren_outfit2_dress.mp4", model: MODELS[1], size: "298 MB", uploaded: "1h ago", synced: "40m ago", gradient: "linear-gradient(135deg, #833ab4, #ff0069)" },
-  { id: "d3", name: "r6_ren_studio_loop.mp4", model: MODELS[1], size: "89 MB", uploaded: "2d ago", synced: "2d ago", gradient: "linear-gradient(135deg, #833ab4, #00f4e2)" },
-  { id: "d4", name: "r8_tyler_shoulders_raw.mp4", model: MODELS[0], size: "211 MB", uploaded: "4d ago", synced: "4d ago", gradient: "linear-gradient(135deg, #ff0069, #fcaf45)" },
-  { id: "d5", name: "r4_ella_smoothie.mp4", model: MODELS[2], size: "156 MB", uploaded: "3d ago", synced: "3d ago", gradient: "linear-gradient(135deg, #78c257, #00f4e2)" },
-  { id: "d6", name: "r2_tyler_legs_day.mp4", model: MODELS[0], size: "264 MB", uploaded: "1d ago", synced: "22h ago", gradient: "linear-gradient(135deg, #ff0069, #833ab4)" },
+const SEED_IDEAS = [
+  { _id: "i1", modelId: "m1", niche: "Fitness", campaign: "April 2026", generatedBrief: JSON.stringify({ hook: "POV: It's photo day and I pretends to eat a big bowl of rice first", steps: ["1. Sit at table with big bowl of rice and chicken", "2. Pick up chopsticks, pause dramatically", "3. Flash a knowing smirk at the camera"], captionSuggestion: "Carbs? In THIS economy? 📦😂", hashtags: ["#Tyler","#Fitness","#GymLife","#ThirstTrap"] }), status: "in_progress", createdAt: Date.now() - 3600000 },
+  { _id: "i2", modelId: "m3", niche: "GFE", campaign: "Spring 2026", generatedBrief: JSON.stringify({ hook: "He texts back. I'm still unbothered 🖤", steps: ["1. Sit on bed, phone in hand", "2. Look at notification, raise eyebrow", "3. Put phone down, go back to what you were doing"], captionSuggestion: "He texts back. I'm still unbothered 🖤", hashtags: ["#Ella","#GFE","#POV"] }), status: "clips_received", createdAt: Date.now() - 7200000 },
+  { _id: "i3", modelId: "m2", niche: "Fitness", campaign: "April 2026", generatedBrief: JSON.stringify({ hook: "Gym mirror flex, unbothered energy", steps: ["1. Walk up to gym mirror", "2. Check self out confidently", "3. Flex, smirk at camera", "4. Walk away unbothered"], captionSuggestion: "POV: You know what it is 💋", hashtags: ["#Ren","#Fitness","#GymReels"] }), status: "sent", createdAt: Date.now() - 86400000 },
 ];
 
-const STATS = [
-  { label: "Briefs Sent", value: INITIAL_REELS.length, icon: Send, color: "#ff0069" },
-  { label: "Awaiting Upload", value: INITIAL_REELS.filter(r => r.status === "filmed").length, icon: Upload, color: "#fcaf45" },
-  { label: "In Drive", value: INITIAL_REELS.filter(r => r.status === "drive").length, icon: FolderOpen, color: "#833ab4" },
-  { label: "Ready to Edit", value: DRIVE_FILES.length, icon: Wand2, color: "#78c257" },
-];
-
-function ReelCard({ reel, active, onClick }: { reel: Reel; active: boolean; onClick: () => void }) {
-  const color = STATUS_COLORS[reel.status];
+function ModelCard({
+  name, niche, instagramHandle, activeCount, doneCount, inProgressCount, selected, onClick,
+}: {
+  name: string; niche: string; instagramHandle: string;
+  activeCount: number; doneCount: number; inProgressCount: number;
+  selected: boolean; onClick: () => void;
+}) {
   return (
-    <motion.button
-      initial={{ opacity: 0, x: -8 }}
-      animate={{ opacity: 1, x: 0 }}
-      onClick={onClick}
-      className="w-full text-left px-4 py-3 rounded-xl transition-all"
-      style={{
-        backgroundColor: active ? "rgba(255,0,105,0.08)" : "transparent",
-        border: active ? `1px solid rgba(255,0,105,0.25)` : `1px solid transparent`,
-      }}
-    >
-      <div className="flex items-start gap-2.5">
-        <div
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0 mt-0.5"
-          style={{ backgroundColor: reel.model.color }}
-        >
-          {reel.model.initials}
+    <motion.button onClick={onClick} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
+      className="w-full text-left p-4 rounded-2xl transition-all"
+      style={{ backgroundColor: selected ? "rgba(255,0,105,0.08)" : "#121212", border: `1px solid ${selected ? "rgba(255,0,105,0.3)" : "rgba(255,255,255,0.08)"}` }}>
+      <div className="flex items-start gap-3">
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-black text-white flex-shrink-0"
+          style={{ background: niche === "Fitness" ? "linear-gradient(135deg,#ff0069,#fcaf45)" : "linear-gradient(135deg,#833ab4,#fd1d1d)" }}>
+          {name.slice(0, 2).toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-white text-xs font-medium truncate leading-tight">{reel.title}</p>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>{reel.model.name}</span>
-            <span
-              className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
-              style={{ backgroundColor: `${color}18`, color }}
-            >
-              {STATUS_LABELS[reel.status]}
-            </span>
+          <div className="flex items-center justify-between mb-0.5">
+            <p className="text-sm font-semibold text-white">{name}</p>
+            {activeCount > 0 && <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: "rgba(255,0,105,0.12)", color: "#ff0069" }}>{activeCount} active</span>}
           </div>
-          <p className="text-[10px] mt-0.5" style={{ color: "var(--muted-foreground)" }}>{reel.created}</p>
+          <p className="text-[11px] mb-2" style={{ color: "#a8a8a8" }}>{niche} · {instagramHandle}</p>
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1 text-[10px]" style={{ color: "#22c55e" }}><CheckCircle className="w-2.5 h-2.5" /> {doneCount} done</span>
+            <span className="flex items-center gap-1 text-[10px]" style={{ color: "#f59e0b" }}><Clock className="w-2.5 h-2.5" /> {inProgressCount} in progress</span>
+          </div>
         </div>
+        <ChevronRight className="w-4 h-4 flex-shrink-0 mt-3" style={{ color: "#a8a8a8" }} />
       </div>
     </motion.button>
   );
 }
 
-function BriefComposer({ models, onSend }: { models: Model[]; onSend: (r: Reel) => void }) {
-  const [selectedModel, setSelectedModel] = useState<Model | null>(null);
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
-  const [niche, setNiche] = useState("");
-  const [instructions, setInstructions] = useState("");
-  const [props, setProps] = useState("");
-  const [outfit, setOutfit] = useState("");
-
-  const handleSend = () => {
-    if (!selectedModel || !title || !category) return;
-    onSend({
-      id: `r${Date.now()}`,
-      title,
-      category,
-      niche,
-      model: selectedModel,
-      status: "pending",
-      instructions,
-      props,
-      outfit,
-      created: "Just now",
-    });
-    setTitle(""); setCategory(""); setNiche(""); setInstructions(""); setProps(""); setOutfit("");
-    setSelectedModel(null);
-  };
-
-  const fieldStyle = { backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.08)", color: "white" };
+function IdeaRow({ idea }: { idea: typeof SEED_IDEAS[0] }) {
+  const cfg = STATUS_CONFIG[idea.status] ?? STATUS_CONFIG.draft;
+  let brief: { hook?: string; steps?: string[]; captionSuggestion?: string } = {};
+  try { brief = JSON.parse(idea.generatedBrief); } catch {}
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-5">
-      <div className="flex items-center justify-between">
-        <h2 className="text-white font-bold text-lg">Send a New Brief</h2>
-      </div>
-
-      {/* Model select */}
-      <div>
-        <label className="text-xs font-semibold mb-2 block" style={{ color: "var(--muted-foreground)" }}>Model</label>
-        <div className="flex flex-wrap gap-2">
-          {models.map(m => (
-            <button
-              key={m.id}
-              onClick={() => setSelectedModel(m)}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all"
-              style={{
-                backgroundColor: selectedModel?.id === m.id ? `${m.color}20` : "var(--card)",
-                border: `1px solid ${selectedModel?.id === m.id ? m.color : "rgba(255,255,255,0.08)"}`,
-                color: "white",
-              }}
-            >
-              <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white" style={{ backgroundColor: m.color }}>{m.initials}</div>
-              {m.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Title */}
-      <div>
-        <label className="text-xs font-semibold mb-2 block" style={{ color: "var(--muted-foreground)" }}>Reel Title</label>
-        <input
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          placeholder="e.g. 5AM Morning Routine"
-          className="w-full px-4 py-2.5 rounded-xl text-sm outline-none placeholder:text-muted-foreground"
-          style={fieldStyle}
-        />
-      </div>
-
-      {/* Category */}
-      <div>
-        <label className="text-xs font-semibold mb-2 block" style={{ color: "var(--muted-foreground)" }}>Shoot Category</label>
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.slice(1).map(c => (
-            <button
-              key={c}
-              onClick={() => setCategory(c)}
-              className="px-4 py-1.5 rounded-full text-xs font-medium transition-all"
-              style={{
-                backgroundColor: category === c ? "rgba(255,0,105,0.12)" : "var(--card)",
-                border: `1px solid ${category === c ? "rgba(255,0,105,0.3)" : "rgba(255,255,255,0.08)"}`,
-                color: category === c ? "#ff0069" : "var(--muted-foreground)",
-              }}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Niche */}
-      <div>
-        <label className="text-xs font-semibold mb-2 block" style={{ color: "var(--muted-foreground)" }}>Niche</label>
-        <input
-          value={niche}
-          onChange={e => setNiche(e.target.value)}
-          placeholder="e.g. Fitness, Lifestyle"
-          className="w-full px-4 py-2.5 rounded-xl text-sm outline-none placeholder:text-muted-foreground"
-          style={fieldStyle}
-        />
-      </div>
-
-      {/* Instructions */}
-      <div>
-        <label className="text-xs font-semibold mb-2 block" style={{ color: "var(--muted-foreground)" }}>Filming Instructions</label>
-        <textarea
-          value={instructions}
-          onChange={e => setInstructions(e.target.value)}
-          placeholder="Describe exactly what to film, camera angles, cuts, etc."
-          rows={4}
-          className="w-full px-4 py-3 rounded-xl text-sm outline-none placeholder:text-muted-foreground resize-none"
-          style={fieldStyle}
-        />
-      </div>
-
-      {/* Props */}
-      <div>
-        <label className="text-xs font-semibold mb-2 block" style={{ color: "var(--muted-foreground)" }}>Props Needed</label>
-        <textarea
-          value={props}
-          onChange={e => setProps(e.target.value)}
-          placeholder="e.g. Gym towel, protein shaker, headphones"
-          rows={2}
-          className="w-full px-4 py-3 rounded-xl text-sm outline-none placeholder:text-muted-foreground resize-none"
-          style={fieldStyle}
-        />
-      </div>
-
-      {/* Outfit */}
-      <div>
-        <label className="text-xs font-semibold mb-2 block" style={{ color: "var(--muted-foreground)" }}>Outfit Notes</label>
-        <textarea
-          value={outfit}
-          onChange={e => setOutfit(e.target.value)}
-          placeholder="e.g. Black sports bra + grey joggers, hair in bun"
-          rows={2}
-          className="w-full px-4 py-3 rounded-xl text-sm outline-none placeholder:text-muted-foreground resize-none"
-          style={fieldStyle}
-        />
-      </div>
-
-      <button
-        onClick={handleSend}
-        disabled={!selectedModel || !title || !category}
-        className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-40"
-        style={{ background: "linear-gradient(135deg, #ff0069, #fd1d1d)" }}
-      >
-        Send Brief
-      </button>
-    </div>
-  );
-}
-
-function ReelDetail({ reel, onBack }: { reel: Reel; onBack: () => void }) {
-  const color = STATUS_COLORS[reel.status];
-
-  return (
-    <div className="flex-1 overflow-y-auto p-6">
-      <button onClick={onBack} className="flex items-center gap-1 text-xs mb-5 hover:text-white transition-colors" style={{ color: "var(--muted-foreground)" }}>
-        <ChevronLeft size={14} /> Back to Backlog
-      </button>
-
-      <div className="flex items-start gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0" style={{ backgroundColor: reel.model.color }}>
-          {reel.model.initials}
-        </div>
-        <div>
-          <h2 className="text-white font-bold text-base leading-tight">{reel.title}</h2>
-          <p className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>{reel.model.handle} · {reel.model.name}</p>
-        </div>
-      </div>
-
-      {/* Status + category */}
-      <div className="flex items-center gap-2 mb-6">
-        <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: `${color}18`, color }}>
-          {STATUS_LABELS[reel.status]}
-        </span>
-        <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "rgba(255,255,255,0.06)", color: "var(--muted-foreground)" }}>
-          {reel.category}
-        </span>
-        <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: "rgba(255,255,255,0.04)", color: "var(--muted-foreground)" }}>
-          {reel.niche}
-        </span>
-        <span className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>· {reel.created}</span>
-      </div>
-
-      {/* Sections */}
-      {[
-        { label: "Filming Instructions", value: reel.instructions, icon: Film },
-        { label: "Props Needed", value: reel.props, icon: CheckCircle2 },
-        { label: "Outfit Notes", value: reel.outfit, icon: Users2 },
-      ].map(({ label, value, icon: Icon }) => (
-        value ? (
-          <div key={label} className="mb-5">
-            <div className="flex items-center gap-2 mb-2">
-              <Icon size={13} style={{ color }} />
-              <span className="text-xs font-semibold" style={{ color }}>{label}</span>
-            </div>
-            <div
-              className="p-4 rounded-xl text-sm leading-relaxed"
-              style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.06)", color: "var(--muted-foreground)" }}
-            >
-              {value}
-            </div>
+    <div className="p-4 rounded-xl" style={{ backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-white mb-0.5 truncate">{brief.hook || "No hook"}</p>
+          <div className="flex flex-wrap gap-2">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: cfg.bg, color: cfg.color }}>{cfg.label}</span>
+            {idea.niche && <span className="px-2 py-0.5 rounded-full text-[10px]" style={{ backgroundColor: "rgba(131,58,180,0.1)", color: "#833ab4" }}>{idea.niche}</span>}
+            {idea.campaign && <span className="px-2 py-0.5 rounded-full text-[10px]" style={{ backgroundColor: "rgba(255,255,255,0.04)", color: "#a8a8a8" }}>{idea.campaign}</span>}
           </div>
-        ) : null
-      ))}
-
-      {/* Actions */}
-      <div className="flex flex-wrap gap-3 mt-8">
-        {reel.status === "pending" && (
-          <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ background: "linear-gradient(135deg, #ff0069, #fd1d1d)" }}>
-            <CheckCircle2 size={14} /> Mark as Filmed
-          </button>
-        )}
-        <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold" style={{ backgroundColor: "rgba(255,255,255,0.06)", color: "var(--muted-foreground)", border: "1px solid rgba(255,255,255,0.08)" }}>
-          <MessageSquare size={14} /> Send Reminder
-        </button>
-        {reel.status === "drive" && (
-          <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold" style={{ backgroundColor: "rgba(131,58,180,0.12)", color: "#833ab4", border: "1px solid rgba(131,58,180,0.2)" }}>
-            <FolderOpen size={14} /> View in Drive
-          </button>
-        )}
+        </div>
       </div>
+      {brief.steps?.slice(0, 3).map((step: string, i: number) => (
+        <div key={i} className="flex items-start gap-1.5 mb-1">
+          <span className="w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center flex-shrink-0 mt-0.5" style={{ backgroundColor: "rgba(255,0,105,0.12)", color: "#ff0069" }}>{i + 1}</span>
+          <p className="text-[11px] text-white/60 leading-snug">{step}</p>
+        </div>
+      ))}
+      {brief.captionSuggestion && <p className="text-[11px] italic mt-2" style={{ color: "#a8a8a8" }}>&ldquo;{brief.captionSuggestion}&rdquo;</p>}
     </div>
   );
 }
 
 export default function ModelsPage() {
-  const [activeFilter, setActiveFilter] = useState("All");
-  const [selectedReel, setSelectedReel] = useState<Reel | null>(null);
-  const [showComposer, setShowComposer] = useState(false);
-  const [rightTab, setRightTab] = useState<"upload" | "drive">("drive");
-  const [reels, setReels] = useState<Reel[]>(INITIAL_REELS);
+  const [selectedId, setSelectedId] = useState<string>("m1");
+  const [refreshing, setRefreshing] = useState(false);
 
-  const filtered = activeFilter === "All" ? reels : reels.filter(r => r.category === activeFilter);
+  const model = SEED_MODELS.find(m => m._id === selectedId)!;
+  const modelIdeas = SEED_IDEAS.filter(i => i.modelId === selectedId);
 
-  const addReel = (r: Reel) => {
-    setReels(prev => [r, ...prev]);
-    setShowComposer(false);
-    setSelectedReel(r);
+  const stats = {
+    total: SEED_IDEAS.length,
+    active: SEED_IDEAS.filter(i => ["sent","in_progress","clips_received"].includes(i.status)).length,
+    complete: SEED_IDEAS.filter(i => i.status === "complete").length,
   };
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "var(--background)" }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: "#000000" }}>
       <Sidebar />
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-6xl mx-auto px-8 py-10">
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top bar */}
-        <div
-          className="flex items-center justify-between px-6 py-4 flex-shrink-0"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", backgroundColor: "var(--background)" }}
-        >
-          <div>
-            <div className="flex items-center gap-2">
-              <Users2 size={18} style={{ color: "#ff0069" }} />
-              <h1 className="text-white font-bold text-lg">Model Platform</h1>
-            </div>
-            <p className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>Brief → Film → Upload → Drive</p>
-          </div>
-          <button
-            onClick={() => { setShowComposer(true); setSelectedReel(null); }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-            style={{ background: "linear-gradient(135deg, #ff0069, #fd1d1d)" }}
-          >
-            <Plus size={15} /> New Brief
-          </button>
-        </div>
-
-        {/* Stats strip */}
-        <div
-          className="grid flex-shrink-0"
-          style={{ gridTemplateColumns: "repeat(4, 1fr)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-        >
-          {STATS.map((stat, i) => {
-            const Icon = stat.icon;
-            return (
-              <div key={stat.label} className="px-6 py-4" style={{ borderRight: i < 3 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <Icon size={13} style={{ color: stat.color }} />
-                  <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--muted-foreground)" }}>{stat.label}</span>
+                  <Users2 className="w-4 h-4" style={{ color: "#ff0069" }} />
+                  <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#ff0069" }}>Team</span>
                 </div>
-                <p className="text-2xl font-black" style={{ color: stat.color }}>{stat.value}</p>
+                <h1 className="text-3xl font-bold text-white">Model Dashboard</h1>
+                <p className="text-sm mt-1" style={{ color: "#a8a8a8" }}>Ideas land here from Idea Gen. Track filming progress and clips.</p>
               </div>
-            );
-          })}
-        </div>
+              <button onClick={() => { setRefreshing(true); setTimeout(() => setRefreshing(false), 600); }}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all"
+                style={{ backgroundColor: "rgba(255,255,255,0.06)", color: "#a8a8a8", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} /> Refresh
+              </button>
+            </div>
+          </motion.div>
 
-        {/* Body */}
-        <div className="flex flex-1 min-h-0 overflow-hidden">
+          <div className="grid grid-cols-3 gap-4 mb-8">
+            {[
+              { label: "Total Ideas", value: stats.total, color: "#833ab4", icon: Film },
+              { label: "Active Now", value: stats.active, color: "#ff0069", icon: Clock },
+              { label: "Completed", value: stats.complete, color: "#22c55e", icon: CheckCircle },
+            ].map(stat => (
+              <div key={stat.label} className="p-4 rounded-xl flex items-center gap-3"
+                style={{ backgroundColor: "#121212", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${stat.color}18` }}>
+                  <stat.icon className="w-5 h-5" style={{ color: stat.color }} />
+                </div>
+                <div>
+                  <p className="text-2xl font-black" style={{ color: stat.color }}>{stat.value}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#a8a8a8" }}>{stat.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
 
-          {/* Left — Backlog */}
-          <div
-            className="w-72 flex-shrink-0 flex flex-col overflow-hidden"
-            style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
-          >
-            {/* Filter tabs */}
-            <div className="flex items-center gap-1 px-3 py-3 overflow-x-auto flex-shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-              {CATEGORIES.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveFilter(cat)}
-                  className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                  style={
-                    activeFilter === cat
-                      ? { backgroundColor: "rgba(255,0,105,0.12)", color: "#ff0069" }
-                      : { backgroundColor: "transparent", color: "var(--muted-foreground)" }
-                  }
-                >
-                  {cat}
-                </button>
-              ))}
+          <div className="grid grid-cols-5 gap-6">
+            <div className="col-span-2 space-y-2">
+              <h2 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#a8a8a8" }}>Models</h2>
+              {SEED_MODELS.map(m => {
+                const mi = SEED_IDEAS.filter(i => i.modelId === m._id);
+                return (
+                  <ModelCard key={m._id} {...m}
+                    activeCount={mi.filter(i => !["complete","draft"].includes(i.status)).length}
+                    doneCount={mi.filter(i => i.status === "complete").length}
+                    inProgressCount={mi.filter(i => ["sent","in_progress"].includes(i.status)).length}
+                    selected={selectedId === m._id}
+                    onClick={() => setSelectedId(m._id)}
+                  />
+                );
+              })}
             </div>
 
-            {/* Reel list */}
-            <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
-              {filtered.map(reel => (
-                <ReelCard
-                  key={reel.id}
-                  reel={reel}
-                  active={selectedReel?.id === reel.id}
-                  onClick={() => { setSelectedReel(reel); setShowComposer(false); }}
-                />
-              ))}
-              {filtered.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>No reels in this category</p>
+            <div className="col-span-3 space-y-4">
+              {model && (
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black text-white"
+                    style={{ background: "linear-gradient(135deg,#833ab4,#ff0069)" }}>
+                    {model.name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <h2 className="text-base font-semibold text-white">{model.name}</h2>
+                    <p className="text-[11px]" style={{ color: "#a8a8a8" }}>{model.niche} · {model.instagramHandle}</p>
+                  </div>
+                  <a href={`https://instagram.com/${model.instagramHandle.replace("@", "")}`} target="_blank" rel="noopener noreferrer"
+                    className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold"
+                    style={{ backgroundColor: "rgba(255,0,105,0.08)", color: "#ff0069", border: "1px solid rgba(255,0,105,0.2)" }}>
+                    <ExternalLink className="w-3 h-3" /> IG Profile
+                  </a>
                 </div>
               )}
-            </div>
-          </div>
 
-          {/* Center — Composer or Detail */}
-          <div
-            className="flex-1 min-w-0 overflow-hidden"
-            style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
-          >
-            {showComposer ? (
-              <BriefComposer models={MODELS} onSend={addReel} />
-            ) : selectedReel ? (
-              <ReelDetail reel={selectedReel} onBack={() => setSelectedReel(null)} />
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-center px-8">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: "rgba(255,0,105,0.08)" }}>
-                  <Users2 size={28} style={{ color: "#ff0069" }} />
-                </div>
-                <p className="text-white font-semibold text-base mb-2">Select a reel or create a brief</p>
-                <p className="text-sm mb-6" style={{ color: "var(--muted-foreground)" }}>Click any reel on the left to see the full brief, or create a new one.</p>
-                <button
-                  onClick={() => setShowComposer(true)}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white"
-                  style={{ background: "linear-gradient(135deg, #ff0069, #fd1d1d)" }}
-                >
-                  <Plus size={15} /> New Brief
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Right — Upload + Drive */}
-          <div className="w-80 flex-shrink-0 flex flex-col overflow-hidden">
-
-            {/* Tabs */}
-            <div className="flex items-center p-1 m-3 rounded-xl flex-shrink-0" style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.06)" }}>
-              {([["drive", "Drive", HardDrive], ["upload", "Upload", UploadCloud]] as const).map(([id, label, Icon]) => (
-                <button
-                  key={id}
-                  onClick={() => setRightTab(id)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all"
-                  style={{ color: rightTab === id ? "white" : "var(--muted-foreground)", backgroundColor: rightTab === id ? "rgba(255,0,105,0.12)" : "transparent" }}
-                >
-                  <Icon size={12} /> {label}
-                </button>
+              {modelIdeas.length === 0 ? (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  className="flex flex-col items-center justify-center py-20 rounded-2xl"
+                  style={{ backgroundColor: "#121212", border: "2px dashed rgba(255,255,255,0.06)" }}>
+                  <Film className="w-8 h-8 mb-3" style={{ color: "#a8a8a8" }} />
+                  <p className="text-white font-semibold mb-1">No ideas assigned yet</p>
+                  <p className="text-xs" style={{ color: "#a8a8a8" }}>Send ideas from Idea Generation to see them here</p>
+                </motion.div>
+              ) : modelIdeas.map((idea, i) => (
+                <motion.div key={idea._id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: i * 0.06 }}>
+                  <IdeaRow idea={idea} />
+                </motion.div>
               ))}
             </div>
-
-            {rightTab === "upload" ? (
-              <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
-                {/* Drop zone */}
-                <div
-                  className="rounded-2xl border-2 border-dashed flex flex-col items-center justify-center py-10 px-4 text-center transition-colors cursor-pointer hover:border-pink-500/40"
-                  style={{ borderColor: "rgba(255,255,255,0.1)", backgroundColor: "var(--card)" }}
-                >
-                  <UploadCloud size={32} style={{ color: "var(--muted-foreground)" }} className="mb-3" />
-                  <p className="text-white text-sm font-medium mb-1">Drop files here</p>
-                  <p className="text-xs mb-4" style={{ color: "var(--muted-foreground)" }}>or click to upload · No size limit</p>
-                  <button className="px-5 py-2 rounded-xl text-xs font-semibold text-white" style={{ background: "linear-gradient(135deg, #ff0069, #fd1d1d)" }}>
-                    Select Files
-                  </button>
-                </div>
-
-                {/* Recent uploads */}
-                <div>
-                  <p className="text-xs font-semibold mb-2" style={{ color: "var(--muted-foreground)" }}>Recent Uploads</p>
-                  {INITIAL_REELS.filter(r => r.status === "uploaded" || r.status === "drive").map(r => (
-                    <div key={r.id} className="flex items-center gap-3 py-2.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: r.model.color }}>
-                        <Film size={12} className="text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-xs truncate">{r.title}</p>
-                        <p className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>{r.model.name} · {r.created}</p>
-                      </div>
-                      <span className="text-[9px] font-semibold" style={{ color: STATUS_COLORS[r.status] }}>{STATUS_LABELS[r.status]}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="flex-1 overflow-y-auto px-4 pb-4">
-                {/* Drive header */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <FolderOpen size={14} style={{ color: "#833ab4" }} />
-                    <span className="text-white text-sm font-semibold">Google Drive</span>
-                  </div>
-                  <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>1.4 GB synced</span>
-                </div>
-
-                {/* Files */}
-                <div className="space-y-2">
-                  {DRIVE_FILES.map(f => (
-                    <motion.div
-                      key={f.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors hover:bg-white/5"
-                      style={{ backgroundColor: "var(--card)", border: "1px solid rgba(255,255,255,0.06)" }}
-                    >
-                      {/* Thumbnail */}
-                      <div className="relative w-12 h-14 rounded-lg overflow-hidden flex-shrink-0" style={{ background: f.gradient }}>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Play size={14} className="text-white fill-white" />
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-xs font-medium truncate leading-tight">{f.name}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white" style={{ backgroundColor: f.model.color }}>
-                            {f.model.initials}
-                          </div>
-                          <span className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>{f.model.name}</span>
-                        </div>
-                        <p className="text-[10px] mt-0.5" style={{ color: "var(--muted-foreground)" }}>{f.size} · {f.synced}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Sync status */}
-                <div className="mt-4 flex items-center gap-2 p-3 rounded-xl" style={{ backgroundColor: "rgba(120,194,87,0.08)", border: "1px solid rgba(120,194,87,0.15)" }}>
-                  <CheckCircle2 size={14} style={{ color: "#78c257" }} />
-                  <p className="text-xs" style={{ color: "#78c257" }}>Auto-sync active · Last sync: just now</p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
