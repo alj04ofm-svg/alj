@@ -1,5 +1,5 @@
 "use node";
-import { mutation } from "../_generated/server.js";
+import { action } from "../_generated/server.js";
 import { v } from "convex/values";
 
 interface VideoAnalysisResult {
@@ -65,7 +65,7 @@ Rules:
  * 3. Parse JSON response
  * 4. Save analysis to ideas table
  */
-export const analyzeClip = mutation({
+export const analyzeClip = action({
   args: {
     clipId: v.string(),
     modelId: v.string(),
@@ -159,7 +159,7 @@ export const analyzeClip = mutation({
  * Accepts a Drive download URL and analyzes without needing Convex storage.
  * Useful when called from an API route or when the video is streamed directly.
  */
-export const analyzeClipFromUrl = mutation({
+export const analyzeClipFromUrl = action({
   args: {
     driveUrl: v.string(),
     filename: v.string(),

@@ -1,8 +1,8 @@
 "use node";
-import { mutation } from "../_generated/server.js";
+import { action } from "../_generated/server.js";
 import { v } from "convex/values";
 
-export const generate = mutation({
+export const generate = action({
   args: {
     niche: v.string(),
     model: v.string(),
