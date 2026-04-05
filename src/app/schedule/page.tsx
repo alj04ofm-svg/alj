@@ -352,6 +352,13 @@ function CalendarView() {
   const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [pendingItems, setPendingItems] = useState<any[]>([]);
+  const [currentDate, setCurrentDate] = useState(new Date(2026, 3, 1)); // April 2026
+
+  const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+  const prevMonth = () => setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  const nextMonth = () => setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  const monthLabel = `${MONTH_NAMES[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
 
   useEffect(() => {
     try {
@@ -407,21 +414,21 @@ function CalendarView() {
               </button>
             ))}
           </div>
-          <button className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold text-white transition-all" style={{ background: "linear-gradient(135deg, #ff0069, #fd1d1d)" }}>
+          <button onClick={() => window.location.href = "/content"} className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold text-white transition-all hover:brightness-110" style={{ background: "linear-gradient(135deg, #ff0069, #fd1d1d)" }}>
             <Plus className="w-3.5 h-3.5" />Schedule Post
           </button>
         </div>
       </motion.div>
 
       <motion.div variants={fadeUp} className="flex items-center justify-between mb-4">
-        <button className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "#a8a8a8" }}><ChevronLeft className="w-4 h-4" /></button>
+        <button onClick={prevMonth} className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "#a8a8a8" }}><ChevronLeft className="w-4 h-4" /></button>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-white">April 2026</span>
+          <span className="text-sm font-semibold text-white">{monthLabel}</span>
           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ backgroundColor: "rgba(255,0,105,0.1)", color: "#ff0069" }}>
             <Zap className="w-2.5 h-2.5 inline mr-1" />Live
           </span>
         </div>
-        <button className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "#a8a8a8" }}><ChevronRight className="w-4 h-4" /></button>
+        <button onClick={nextMonth} className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "#a8a8a8" }}><ChevronRight className="w-4 h-4" /></button>
       </motion.div>
 
       <motion.div variants={fadeUp} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)", backgroundColor: "var(--card)" }}>
@@ -482,8 +489,6 @@ function CalendarView() {
     </div>
   );
 }
-
-// ─── Analytics View ───────────────────────────────────────────────────────────
 
 // ─── Analytics View ───────────────────────────────────────────────────────────
 

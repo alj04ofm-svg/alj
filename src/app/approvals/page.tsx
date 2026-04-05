@@ -6,12 +6,12 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import {
   CheckCircle, Clock, Send, AlertCircle, Video, Image, Layers,
   ChevronDown, X, Eye, RefreshCw, Check, Filter, Calendar,
-  MessageSquare, Globe, Tag, Hash,
+  MessageSquare, Globe, Tag, Hash, ArrowRight,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type ApprovalStatus = "pending" | "approved" | "revision" | "published";
+type ApprovalStatus = "pending" | "approved" | "revision" | "rejected" | "published";
 type ContentType = "Reel" | "Post" | "Story" | "Carousel";
 type TabFilter = "all" | "pending" | "approved" | "revision" | "published";
 
@@ -147,7 +147,8 @@ const STATUS_CONFIG: Record<ApprovalStatus, { label: string; color: string; bg: 
   pending:    { label: "Pending",        color: "#f59e0b", bg: "rgba(245,158,11,0.1)",   border: "rgba(245,158,11,0.2)"   },
   approved:   { label: "Approved",       color: "#22c55e", bg: "rgba(34,197,94,0.1)",    border: "rgba(34,197,94,0.2)"    },
   revision:   { label: "Needs Revision", color: "#f97316", bg: "rgba(249,115,22,0.1)",  border: "rgba(249,115,22,0.2)"  },
-  published:  { label: "Published",     color: "#833ab4", bg: "rgba(131,58,180,0.1)",   border: "rgba(131,58,180,0.2)"   },
+  rejected:   { label: "Rejected",       color: "#ef4444", bg: "rgba(239,68,68,0.1)",    border: "rgba(239,68,68,0.2)"   },
+  published:  { label: "Published",      color: "#833ab4", bg: "rgba(131,58,180,0.1)",  border: "rgba(131,58,180,0.2)"  },
 };
 
 const CONTENT_TYPE_ICON: Record<ContentType, React.ReactNode> = {
@@ -272,6 +273,8 @@ function DetailModal({
 }) {
   const [revisionComment, setRevisionComment] = useState("");
   const [showRevisionField, setShowRevisionField] = useState(false);
+  const [showRejectField, setShowRejectField] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
   const [actionDone, setActionDone] = useState<string | null>(null);
 
   if (!item) return null;
@@ -288,10 +291,11 @@ function DetailModal({
       if (!revisionComment.trim()) return;
       onStatusChange(item.id, "revision");
     } else if (action === "reject") {
-      onStatusChange(item.id, "revision");
+      if (!showRejectField) { setShowRejectField(true); return; }
+      onStatusChange(item.id, "rejected");
     }
     setActionDone(action);
-    setTimeout(() => { onClose(); setActionDone(null); setShowRevisionField(false); setRevisionComment(""); }, 1200);
+    setTimeout(() => { onClose(); setActionDone(null); setShowRevisionField(false); setShowRejectField(false); setRevisionComment(""); setRejectReason(""); }, 1200);
   };
 
   return (
@@ -411,6 +415,22 @@ function DetailModal({
                   />
                 </motion.div>
               )}
+              {showRejectField && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                >
+                  <textarea
+                    value={rejectReason}
+                    onChange={e => setRejectReason(e.target.value)}
+                    placeholder="Reason for rejection..."
+                    className="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-white/20 resize-none outline-none transition-all"
+                    style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(239,68,68,0.3)" }}
+                    rows={2}
+                  />
+                </motion.div>
+              )}
             </AnimatePresence>
 
             {/* Submitted by */}
@@ -465,11 +485,22 @@ function DetailModal({
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex items-center justify-center gap-3 py-4 rounded-xl"
+                  className="flex flex-col items-center gap-3 py-4 rounded-xl"
                   style={{ backgroundColor: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)" }}
                 >
-                  <Check className="w-5 h-5" style={{ color: "#22c55e" }} />
-                  <span className="text-sm font-semibold" style={{ color: "#22c55e" }}>Done!</span>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-5 h-5" style={{ color: "#22c55e" }} />
+                    <span className="text-sm font-semibold" style={{ color: "#22c55e" }}>Done!</span>
+                  </div>
+                  <button
+                    onClick={() => window.location.href = "/schedule"}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white transition-all hover:brightness-110"
+                    style={{ background: "linear-gradient(135deg, #833ab4, #ff0069)" }}
+                  >
+                    Next Section
+                    <ArrowRight className="w-3.5 h-3.5" />
+                    <span style={{ color: "#aaa", fontWeight: 400 }}>Schedule</span>
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>

@@ -66,7 +66,30 @@ function AnimatedToggle({ checked, onChange }: { checked: boolean; onChange: () 
 // ─── Profile Tab ──────────────────────────────────────────────────────────────
 
 function ProfileTab() {
+  const [displayName, setDisplayName] = useState("Alex / ALJ");
+  const [email, setEmail] = useState("alex@alj.co");
+  const [timezone, setTimezone] = useState("Asia/Manila (UTC+8)");
   const [toggles, setToggles] = useState({ email: true, slack: false, push: true });
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("iginfull-profile");
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.displayName) setDisplayName(data.displayName);
+        if (data.email) setEmail(data.email);
+        if (data.timezone) setTimezone(data.timezone);
+        if (data.toggles) setToggles(data.toggles);
+      }
+    } catch {}
+  }, []);
+
+  const handleSave = () => {
+    localStorage.setItem("iginfull-profile", JSON.stringify({ displayName, email, timezone, toggles }));
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 2000);
+  };
 
   return (
     <motion.div
@@ -97,16 +120,40 @@ function ProfileTab() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
-            { label: "Display Name", value: "Alex / ALJ" },
-            { label: "Email", value: "alex@alj.co" },
-            { label: "Timezone", value: "Asia/Manila (UTC+8)" },
-            { label: "Role", value: "Admin" },
+            { label: "Display Name", value: displayName, setValue: setDisplayName },
+            { label: "Email", value: email, setValue: setEmail },
+            { label: "Timezone", value: timezone, setValue: setTimezone },
+            { label: "Role", value: "Admin", readonly: true },
           ].map((field) => (
             <div key={field.label}>
               <p className="text-xs uppercase tracking-wider mb-1" style={{ color: "#a8a8a8" }}>{field.label}</p>
-              <p className="text-white">{field.value}</p>
+              {"setValue" in field ? (
+                <input
+                  value={field.value}
+                  onChange={e => field.setValue(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg text-sm text-white outline-none"
+                  style={{ backgroundColor: "#1e1e1e", border: "1px solid rgba(255,255,255,0.08)" }}
+                />
+              ) : (
+                <p className="text-white">{field.value}</p>
+              )}
             </div>
           ))}
+        </div>
+
+        <div className="mt-5 flex items-center gap-3">
+          <button
+            onClick={handleSave}
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+            style={{ background: "linear-gradient(135deg, #ff0069, #833ab4)" }}
+          >
+            Save Changes
+          </button>
+          {saveSuccess && (
+            <span className="text-sm font-medium" style={{ color: "#22c55e" }}>
+              ✓ Saved!
+            </span>
+          )}
         </div>
       </div>
 
@@ -543,6 +590,13 @@ function ContentDefaultsTab() {
   const [autoHashtags, setAutoHashtags] = useState(true);
   const [sliderVal, setSliderVal]       = useState(50);
 
+  const persist = (key: string, val: any) => {
+    try {
+      const existing = JSON.parse(localStorage.getItem("iginfull-defaults") || "{}");
+      localStorage.setItem("iginfull-defaults", JSON.stringify({ ...existing, [key]: val }));
+    } catch {}
+  };
+
   return (
     <motion.div
       key="content"
@@ -585,7 +639,7 @@ function ContentDefaultsTab() {
               <p className="text-white text-sm">Auto-enhance clips</p>
               <p className="text-xs" style={{ color: "#a8a8a8" }}>Automatically enhance video clips on upload</p>
             </div>
-            <AnimatedToggle checked={autoEnhance} onChange={() => setAutoEnhance(v => !v)} />
+            <AnimatedToggle checked={autoEnhance} onChange={() => { setAutoEnhance(v => !v); persist("autoEnhance", !autoEnhance); }} />
           </div>
           <div>
             <div className="flex justify-between mb-2">
@@ -593,7 +647,7 @@ function ContentDefaultsTab() {
               <p className="text-xs font-medium text-white">{sliderVal < 33 ? "Subtle" : sliderVal < 66 ? "Moderate" : "Aggressive"}</p>
             </div>
             <input type="range" min={0} max={100} value={sliderVal}
-              onChange={(e) => setSliderVal(Number(e.target.value))}
+              onChange={(e) => { const v = Number(e.target.value); setSliderVal(v); persist("sliderVal", v); }}
               className="w-full accent-pink-500" />
           </div>
         </div>
@@ -616,7 +670,7 @@ function ContentDefaultsTab() {
             </p>
             <p className="text-xs" style={{ color: "#a8a8a8" }}>Generate relevant hashtags for each post</p>
           </div>
-          <AnimatedToggle checked={autoHashtags} onChange={() => setAutoHashtags(v => !v)} />
+          <AnimatedToggle checked={autoHashtags} onChange={() => { setAutoHashtags(v => !v); persist("autoHashtags", !autoHashtags); }} />
         </div>
         <div>
           <p className="text-xs uppercase tracking-wider mb-2" style={{ color: "#a8a8a8" }}>Default Post Time</p>

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import {
   Calendar, FileText, BarChart2, MessageCircle, CheckCircle, Users,
-  Settings, ChevronRight, ChevronLeft, Users2, Sparkles,
+  Settings, ChevronRight, ChevronLeft, Users2, Sparkles, ListOrdered,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -21,6 +21,7 @@ const NAV_ITEMS: NavItem[] = [
   { icon: FileText, label: "Content", href: "/content" },
   { icon: Sparkles, label: "Ideas", href: "/ideas" },
   { icon: Users2, label: "Models", href: "/models" },
+  { icon: ListOrdered, label: "Queue", href: "/queue" },
   { icon: BarChart2, label: "Analytics", href: "/analytics" },
   { icon: MessageCircle, label: "Community", href: "/community" },
   { icon: CheckCircle, label: "Approvals", href: "/approvals" },

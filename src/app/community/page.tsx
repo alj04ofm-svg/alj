@@ -95,17 +95,36 @@ function formatNum(n: number): string {
 
 // ─── Post Card ────────────────────────────────────────────────────────────────
 
-function PostCard({ post, onLike }: { post: Post; onLike: (id: string) => void }) {
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
+function PostCard({
+  post,
+  liked,
+  saved,
+  onToggleLike,
+  onToggleSave,
+}: {
+  post: Post;
+  liked: boolean;
+  saved: boolean;
+  onToggleLike: (id: string) => void;
+  onToggleSave: (id: string) => void;
+}) {
   const [likeCount, setLikeCount] = useState(post.likes);
+  const [localLiked, setLocalLiked] = useState(liked);
+  const [localSaved, setLocalSaved] = useState(saved);
 
   const handleLike = () => {
-    if (!liked) {
-      setLiked(true);
+    setLocalLiked(l => !l);
+    if (!localLiked) {
       setLikeCount(c => c + 1);
-      onLike(post.id);
+    } else {
+      setLikeCount(c => c - 1);
     }
+    onToggleLike(post.id);
+  };
+
+  const handleSave = () => {
+    setLocalSaved(s => !s);
+    onToggleSave(post.id);
   };
 
   return (
@@ -191,9 +210,9 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: string) => void }
             <button
               onClick={handleLike}
               className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
-              style={{ color: liked ? "#ff0069" : "var(--muted-foreground)", background: liked ? "rgba(255,0,105,0.1)" : "transparent" }}
+              style={{ color: localLiked ? "#ff0069" : "var(--muted-foreground)", background: localLiked ? "rgba(255,0,105,0.1)" : "transparent" }}
             >
-              <Heart size={15} className={liked ? "fill-current" : ""} />
+              <Heart size={15} className={localLiked ? "fill-current" : ""} />
             </button>
             <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>{formatNum(likeCount)}</span>
 
@@ -203,11 +222,11 @@ function PostCard({ post, onLike }: { post: Post; onLike: (id: string) => void }
             <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>{formatNum(post.comments)}</span>
           </div>
           <button
-            onClick={() => setSaved(s => !s)}
+            onClick={handleSave}
             className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-            style={{ color: saved ? "#fcaf45" : "var(--muted-foreground)" }}
+            style={{ color: localSaved ? "#fcaf45" : "var(--muted-foreground)" }}
           >
-            <BookmarkIcon size={14} className={saved ? "fill-current" : ""} />
+            <BookmarkIcon size={14} className={localSaved ? "fill-current" : ""} />
           </button>
         </div>
       </div>
@@ -271,9 +290,10 @@ export default function CommunityPage() {
   const [activeView, setActiveView] = useState<View>("for-you");
   const [activeNiche, setActiveNiche] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [savedPosts, setSavedPosts] = useState<string[]>([]);
+  const [savedPosts, setSavedPosts] = useState<Set<string>>(new Set());
   const [feed, setFeed] = useState<Post[]>(POSTS);
-  const [likedPosts, setLikedPosts] = useState<string[]>([]);
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [following, setFollowing] = useState<Set<string>>(new Set());
 
   const filteredPosts = feed.filter(post => {
     const matchesSearch = !searchQuery ||
@@ -284,8 +304,31 @@ export default function CommunityPage() {
     return matchesSearch && matchesNiche;
   });
 
-  const handleLike = (postId: string) => {
-    setLikedPosts(prev => [...prev, postId]);
+  const handleToggleLike = (postId: string) => {
+    setLikedPosts(prev => {
+      const next = new Set(prev);
+      if (next.has(postId)) next.delete(postId);
+      else next.add(postId);
+      return next;
+    });
+  };
+
+  const handleToggleSave = (postId: string) => {
+    setSavedPosts(prev => {
+      const next = new Set(prev);
+      if (next.has(postId)) next.delete(postId);
+      else next.add(postId);
+      return next;
+    });
+  };
+
+  const handleToggleFollow = (handle: string) => {
+    setFollowing(prev => {
+      const next = new Set(prev);
+      if (next.has(handle)) next.delete(handle);
+      else next.add(handle);
+      return next;
+    });
   };
 
   const topCreators = CREATORS.sort((a, b) => b.followers - a.followers).slice(0, 4);
@@ -309,7 +352,7 @@ export default function CommunityPage() {
               <div className="w-8 h-8 rounded-xl flex items-center justify-center text-[9px] font-black text-white" style={{ background: "linear-gradient(135deg, #ff0069, #833ab4)" }}>
                 IG
               </div>
-              <span className="text-white font-black text-base tracking-tight">Typeless</span>
+              <span className="text-white font-black text-base tracking-tight">IGINFULL</span>
             </div>
             <div className="hidden md:flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-medium" style={{ backgroundColor: "rgba(255,0,105,0.08)", border: "1px solid rgba(255,0,105,0.15)", color: "#ff0069" }}>
               <TrendingUp size={10} /> IGINFULL Community
@@ -429,7 +472,13 @@ export default function CommunityPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05 }}
                     >
-                      <PostCard post={post} onLike={handleLike} />
+                      <PostCard
+                        post={post}
+                        liked={likedPosts.has(post.id)}
+                        saved={savedPosts.has(post.id)}
+                        onToggleLike={handleToggleLike}
+                        onToggleSave={handleToggleSave}
+                      />
                     </motion.div>
                   ))
                 ) : (
@@ -461,7 +510,11 @@ export default function CommunityPage() {
               <p className="text-xs mb-4 leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
                 Every reel you post through IGINFULL gets featured here. Drive views to your real profile and grow your audience.
               </p>
-              <button className="w-full py-2.5 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90" style={{ background: "linear-gradient(135deg, #ff0069, #833ab4)" }}>
+              <button
+                onClick={() => alert("Connect your Instagram account in Settings → Connected Accounts")}
+                className="w-full py-2.5 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90"
+                style={{ background: "linear-gradient(135deg, #ff0069, #833ab4)" }}
+              >
                 Connect IG Account
               </button>
             </div>
@@ -473,26 +526,37 @@ export default function CommunityPage() {
                 <button className="text-xs font-medium" style={{ color: "#ff0069" }}>See all</button>
               </div>
               <div className="p-4 space-y-3">
-                {CREATORS.slice(0, 4).map(c => (
-                  <div key={c.handle} className="flex items-center gap-3">
-                    <div
-                      className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-                      style={{ backgroundColor: c.color }}
-                    >
-                      {c.initials}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1">
-                        <span className="text-white text-xs font-medium truncate">{c.handle}</span>
-                        {c.igVerified && <Check size={9} className="text-ig-pink flex-shrink-0" />}
+                {CREATORS.slice(0, 4).map(c => {
+                  const isFollowing = following.has(c.handle);
+                  return (
+                    <div key={c.handle} className="flex items-center gap-3">
+                      <div
+                        className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+                        style={{ backgroundColor: c.color }}
+                      >
+                        {c.initials}
                       </div>
-                      <p className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>{c.niche} · {formatNum(c.followers)} followers</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1">
+                          <span className="text-white text-xs font-medium truncate">{c.handle}</span>
+                          {c.igVerified && <Check size={9} className="text-ig-pink flex-shrink-0" />}
+                        </div>
+                        <p className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>{c.niche} · {formatNum(c.followers)} followers</p>
+                      </div>
+                      <button
+                        onClick={() => handleToggleFollow(c.handle)}
+                        className="px-3 py-1 rounded-lg text-[10px] font-semibold flex-shrink-0 transition-all"
+                        style={
+                          isFollowing
+                            ? { backgroundColor: "transparent", color: "var(--muted-foreground)", border: "1px solid rgba(255,255,255,0.1)" }
+                            : { backgroundColor: "rgba(255,0,105,0.08)", color: "#ff0069", border: "1px solid rgba(255,0,105,0.15)" }
+                        }
+                      >
+                        {isFollowing ? "Following" : "Follow"}
+                      </button>
                     </div>
-                    <button className="px-3 py-1 rounded-lg text-[10px] font-semibold flex-shrink-0" style={{ backgroundColor: "rgba(255,0,105,0.08)", color: "#ff0069", border: "1px solid rgba(255,0,105,0.15)" }}>
-                      Follow
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 

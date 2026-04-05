@@ -13,6 +13,7 @@ import {
   X,
   Shield,
   Mail,
+  Loader2,
 } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 
@@ -302,6 +303,8 @@ function InviteModal({ open, onClose }: { open: boolean; onClose: () => void }) 
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<Role>("VA");
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const toggleAccount = (acc: string) => {
     setSelectedAccounts((prev) =>
@@ -309,13 +312,49 @@ function InviteModal({ open, onClose }: { open: boolean; onClose: () => void }) 
     );
   };
 
-  const handleInvite = () => {
-    console.log({ name, email, role, selectedAccounts });
-    setName("");
-    setEmail("");
-    setRole("VA");
-    setSelectedAccounts([]);
-    onClose();
+  const handleInvite = async () => {
+    if (!name || !email) return;
+    setLoading(true);
+    setFeedback(null);
+
+    try {
+      const res = await fetch("/api/team/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, role, accountIds: selectedAccounts }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setFeedback({ type: "error", message: data.message || "Something went wrong." });
+        setLoading(false);
+        return;
+      }
+
+      setFeedback({ type: "success", message: data.message });
+      // Persist to localStorage
+      try {
+        const raw = localStorage.getItem("iginfull-team-invites");
+        const existing: unknown[] = raw ? JSON.parse(raw) : [];
+        localStorage.setItem("iginfull-team-invites", JSON.stringify([...existing, data.invite]));
+      } catch {
+        // localStorage unavailable (e.g. SSR); ignore
+      }
+
+      // Brief delay so user reads the success message, then close
+      setTimeout(() => {
+        setName("");
+        setEmail("");
+        setRole("VA");
+        setSelectedAccounts([]);
+        setLoading(false);
+        setFeedback(null);
+        onClose();
+      }, 1500);
+    } catch {
+      setFeedback({ type: "error", message: "Network error — please try again." });
+      setLoading(false);
+    }
   };
 
   return (
@@ -457,6 +496,29 @@ function InviteModal({ open, onClose }: { open: boolean; onClose: () => void }) 
                     })}
                   </div>
                 </div>
+
+                {feedback && (
+                  <div
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
+                    style={{
+                      backgroundColor: feedback.type === "success"
+                        ? "rgba(74,222,128,0.08)"
+                        : "rgba(255,82,82,0.08)",
+                      color: feedback.type === "success" ? "#4ade80" : "#ff5252",
+                      border: `1px solid ${feedback.type === "success"
+                        ? "rgba(74,222,128,0.2)"
+                        : "rgba(255,82,82,0.2)"
+                      }`,
+                    }}
+                  >
+                    {feedback.type === "success" ? (
+                      <Check className="w-3.5 h-3.5 flex-shrink-0" />
+                    ) : (
+                      <X className="w-3.5 h-3.5 flex-shrink-0" />
+                    )}
+                    {feedback.message}
+                  </div>
+                )}
               </div>
 
               <div
@@ -472,10 +534,17 @@ function InviteModal({ open, onClose }: { open: boolean; onClose: () => void }) 
                 </button>
                 <button
                   onClick={handleInvite}
-                  disabled={!name || !email}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed gradient-ig"
+                  disabled={!name || !email || loading}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed gradient-ig flex items-center justify-center gap-2"
                 >
-                  Send Invite
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Send Invite"
+                  )}
                 </button>
               </div>
             </div>
