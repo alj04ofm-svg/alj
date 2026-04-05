@@ -525,15 +525,17 @@ export default function IdeasPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ model, niche, style, campaign }),
         });
+        const text = await res.text();
+        console.log("[/api/generate-ideas] status:", res.status, "body:", text);
         if (res.ok) {
-          const data = await res.json();
+          const data = JSON.parse(text);
           generated = data.briefs.map((b: any, i: number) => ({
             id: `gemini-${Date.now()}-${i}`,
             ...b,
             status: "draft" as const,
           }));
         } else {
-          console.warn("Gemini API error, falling back to mock:", await res.text());
+          console.warn("Gemini API error, falling back to mock:", text);
         }
       } catch (apiErr) {
         console.warn("Gemini API unreachable, using mock generation:", apiErr);
