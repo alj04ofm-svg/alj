@@ -436,7 +436,7 @@ export default function ContentPage() {
                     <p className="text-[10px] font-semibold uppercase tracking-wider mb-2" style={{ color: "#a8a8a8" }}>Before</p>
                     <div className="aspect-video rounded-xl overflow-hidden relative"
                       style={{ backgroundColor: "#1a0a0a" }}>
-                      {clips[0]?.file && !clips[0].enhancedUrl ? (
+                      {clips[0]?.file ? (
                         <video
                           src={URL.createObjectURL(clips[0].file)}
                           className="w-full h-full object-cover opacity-80"

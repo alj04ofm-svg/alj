@@ -1,4 +1,4 @@
-import { query, mutation, v } from "../_generated/server";
+import { query, mutation, v } from "convex/server";
 
 export const list = query({
   args: {},

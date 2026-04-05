@@ -1,5 +1,5 @@
 "use node";
-import { internalMutation, internalQuery } from "../_generated/server";
+import { internalMutation, internalQuery } from "convex/server";
 import { v } from "convex/values";
 import { listDriveFiles } from "./index";
 
@@ -29,7 +29,7 @@ async function getValidTokens(
 }
 
 // ─── Scheduled function — runs every 15 minutes ──────────────────────────────
-import { schedule } from "../_generated/scheduler";
+import { schedule } from "convex/server";
 
 /**
  * autoSync — scheduled function. Must be registered in convex.config.ts.

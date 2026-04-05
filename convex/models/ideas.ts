@@ -1,4 +1,4 @@
-import { query, v } from "../_generated/server";
+import { query, v } from "convex/server";
 
 export const list = query({
   args: { modelId: v.optional(v.string()) },
