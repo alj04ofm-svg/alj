@@ -552,7 +552,11 @@ function IntegrationsTab({ modelId }: { modelId?: string }) {
                     </div>
                     <span className="connected-glow relative w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#22c55e" }} />
                     {intg.action && (
-                      <button className="text-xs px-3 py-1.5 rounded-lg border text-white" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                      <button
+                        onClick={() => alert("Integration configuration coming soon")}
+                        className="text-xs px-3 py-1.5 rounded-lg border text-white"
+                        style={{ borderColor: "rgba(255,255,255,0.08)" }}
+                      >
                         {intg.action}
                       </button>
                     )}
@@ -824,8 +828,8 @@ function BillingTab() {
         </div>
 
         <div className="flex gap-3">
-          <button className="flex-1 py-2.5 rounded-lg text-white font-medium text-sm gradient-ig">Upgrade Plan</button>
-          <button className="flex-1 py-2.5 rounded-lg border text-sm font-medium"
+          <button onClick={() => alert("Billing portal coming soon")} className="flex-1 py-2.5 rounded-lg text-white font-medium text-sm gradient-ig">Upgrade Plan</button>
+          <button onClick={() => alert("Billing portal coming soon")} className="flex-1 py-2.5 rounded-lg border text-sm font-medium"
             style={{ borderColor: "rgba(255,255,255,0.15)", color: "#a8a8a8" }}>Manage Subscription</button>
         </div>
       </div>
