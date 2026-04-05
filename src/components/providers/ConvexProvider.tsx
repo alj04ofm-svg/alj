@@ -7,9 +7,10 @@ export function ConvexProviderWrapper({
 }: {
   children: React.ReactNode;
 }) {
-  // If Convex URL is not configured, render without Convex (local/mock mode)
-  if (!convexClient) {
+  const client = convexClient.client;
+  if (!client) {
+    // Convex not configured — render without provider (local/mock mode)
     return <>{children}</>;
   }
-  return <RealConvexProvider client={convexClient}>{children}</RealConvexProvider>;
+  return <RealConvexProvider client={client}>{children}</RealConvexProvider>;
 }
