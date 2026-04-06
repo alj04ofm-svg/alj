@@ -476,23 +476,38 @@ function BriefDetail({
       </div>
 
       {/* Actions */}
-      {brief.status !== "sent" && (
-        <button
-          onClick={onSend}
-          className="w-full py-3 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90"
-          style={{ background: "linear-gradient(135deg, #78c257, #5ba81a)" }}
-        >
-          <Send className="w-3.5 h-3.5" />
-          Send to {brief.model}&rsquo;s Dashboard
-        </button>
-      )}
-      {brief.status === "sent" && (
-        <div
-          className="w-full py-3 rounded-xl text-sm font-bold text-center flex items-center justify-center gap-2"
-          style={{ backgroundColor: "rgba(120,194,87,0.1)", color: "#78c257", border: "1px solid rgba(120,194,87,0.2)" }}
-        >
-          <Check className="w-3.5 h-3.5" />
-          Sent to {brief.model}&rsquo;s Dashboard
+      {brief.status !== "sent" ? (
+        <div className="space-y-2">
+          <button
+            onClick={onSend}
+            className="w-full py-3 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90"
+            style={{ background: "linear-gradient(135deg, #78c257, #5ba81a)" }}
+          >
+            <Send className="w-3.5 h-3.5" />
+            Send to {brief.model}&rsquo;s Dashboard
+          </button>
+          <p className="text-[10px] text-center" style={{ color: "#555" }}>
+            The brief will be saved and sent to your models dashboard.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <div
+            className="w-full py-3 rounded-xl text-sm font-bold text-center flex items-center justify-center gap-2"
+            style={{ backgroundColor: "rgba(120,194,87,0.1)", color: "#78c257", border: "1px solid rgba(120,194,87,0.2)" }}
+          >
+            <CheckCircle className="w-3.5 h-3.5" />
+            Sent to {brief.model}&rsquo;s Dashboard
+          </div>
+          <button
+            onClick={() => window.location.href = "/content"}
+            className="w-full py-2.5 rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-2 transition-all hover:brightness-110"
+            style={{ background: "linear-gradient(135deg, #833ab4, #ff0069)" }}
+          >
+            Next Section
+            <ArrowRight className="w-3.5 h-3.5" />
+            <span style={{ color: "#ccc", fontWeight: 400 }}>Content</span>
+          </button>
         </div>
       )}
     </motion.div>
