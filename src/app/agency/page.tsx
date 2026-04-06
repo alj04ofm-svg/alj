@@ -19,7 +19,7 @@ export default function AgencyPage() {
   return (
     <div style={{ height: "100vh", overflow: "hidden", borderBottom: "1px solid var(--nva-border)" }}>
       <AgencyDashboardLayout activeView={agencyView} onViewChange={setAgencyView}>
-        {agencyView === "landing" && <AgencyLanding />}
+        {agencyView === "landing" && <AgencyLanding onViewChange={setAgencyView} />}
         {agencyView === "schedule" && <AgencySchedule />}
         {agencyView === "shift-tracking" && <ShiftTracker />}
         {agencyView === "content-to-models" && <ContentToModels />}

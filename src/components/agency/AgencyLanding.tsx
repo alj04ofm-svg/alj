@@ -1,40 +1,49 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  Users, MessageSquare, Megaphone, FolderOpen, Clock, BarChart3,
-  TrendingUp, DollarSign, Star, ArrowUpRight, Zap, CheckCircle2,
-  Globe, Radio, Video
+  Users, MessageSquare, Megaphone, FolderOpen, Clock,
+  TrendingUp, DollarSign, Star, Globe, Radio, Video,
+  UserPlus, FileText, ChevronRight
 } from "lucide-react";
 
+import type { AgencyView } from "./AgencyDashboardLayout";
+
+interface Props {
+  onViewChange?: (view: AgencyView) => void;
+}
+
 const STATS = [
-  { label: "Active Models", value: "24", change: "+3 this month", up: true, icon: Users },
-  { label: "Monthly Revenue", value: "$84.2K", change: "+18% vs last month", up: true, icon: DollarSign },
-  { label: "Avg. Response Rate", value: "94%", change: "+2.1% improvement", up: true, icon: TrendingUp },
-  { label: "Content Delivered", value: "312", change: "This month", up: true, icon: Star },
+  { label: "Active Models", value: "13", change: "All info sheets complete", up: true, icon: Users, color: "#d4a853" },
+  { label: "Velour Applicants", value: "0", change: "Pending review", up: false, icon: UserPlus, color: "#f59e0b" },
+  { label: "Avg. Response Rate", value: "94%", change: "+2.1% vs last month", up: true, icon: TrendingUp, color: "#d4a853" },
+  { label: "Content Delivered", value: "312", change: "This month", up: true, icon: Star, color: "#d4a853" },
 ];
 
 const QUICK_ACTIONS = [
-  { label: "Chatter Onboarding", desc: "Add a new chatter to the team", icon: MessageSquare, color: "#d4a853", view: "chatter-onboarding" as const },
-  { label: "Marketing Onboarding", desc: "Onboard a marketing team member", icon: Megaphone, color: "#f0c97a", view: "marketing-onboarding" as const },
-  { label: "Model Requests", desc: "Send or track content requests", icon: FolderOpen, color: "#a07830", view: "model-requests" as const },
-  { label: "NV Time Bot", desc: "Log or review employee hours", icon: Clock, color: "#d4a853", view: "time-tracking" as const },
+  { label: "Model Info Sheets", desc: "View all 13 model profiles", icon: FileText, color: "#d4a853", action: "navigate", view: "model-management" as AgencyView },
+  { label: "Model Requests", desc: "Track content requests", icon: FolderOpen, color: "#a07830", action: "navigate", view: "model-requests" as AgencyView },
+  { label: "Recruit — Chatter", desc: "Open Velour chatter recruitment", icon: MessageSquare, color: "#d4a853", action: "external", href: "/velour/chatter" },
+  { label: "Recruit — Marketing", desc: "Open Velour marketing recruitment", icon: Megaphone, color: "#f0c97a", action: "external", href: "/velour/marketing" },
+];
+
+const VELOUR_APPLICANTS = [
+  { name: "No applicants yet", status: "pending", type: "Chatter", applied: "—", note: "Share the Velour link to start receiving applications" },
 ];
 
 const RECENT_ACTIVITY = [
-  { user: "Alex (Chatter)", action: "completed onboarding", time: "2 min ago", type: "chatter" },
-  { user: "Model: Bella", action: "uploaded 3 reels for review", time: "18 min ago", type: "content" },
-  { user: "Marketing: Jamie", action: "submitted weekly report", time: "1 hr ago", type: "marketing" },
-  { user: "Model: Mika", action: "accepted content request #442", time: "2 hr ago", type: "content" },
-  { user: "Chatter: Sam", action: "clocked in via NV Time Bot", time: "3 hr ago", type: "time" },
-  { user: "Model: Luna", action: "uploaded PPV content for review", time: "5 hr ago", type: "content" },
+  { user: "Model: Tyler", action: "Info sheet complete", time: "Today", type: "content" },
+  { user: "Model: Ella Mira", action: "Info sheet complete", time: "Today", type: "content" },
+  { user: "Model: Amam", action: "Info sheet complete", time: "Today", type: "content" },
+  { user: "Admin", action: "Viewed all model profiles", time: "Today", type: "admin" },
 ];
 
 const TOP_PERFORMERS = [
-  { name: "Bella", type: "Model", metric: "342", metricLabel: "New subs this week", avatar: "B" },
-  { name: "Alex", type: "Chatter", metric: "98%", metricLabel: "Response rate", avatar: "A" },
-  { name: "Jamie", type: "Marketing", metric: "28", metricLabel: "Reels published", avatar: "J" },
-  { name: "Mika", type: "Model", metric: "$4.2K", metricLabel: "This week's PPV", avatar: "M" },
+  { name: "Tyler Rex", type: "Model", metric: "$8.4K", metricLabel: "Monthly revenue", avatar: "TR", color: "#8B5CF6" },
+  { name: "Amam", type: "Model", metric: "8 accts", metricLabel: "Social accounts", avatar: "AM", color: "#F472B6" },
+  { name: "Ella Mira", type: "Model", metric: "2 accts", metricLabel: "Social accounts", avatar: "EM", color: "#F59E0B" },
+  { name: "Ren / Rin", type: "Model", metric: "7 accts", metricLabel: "Social accounts", avatar: "RK", color: "#EF4444" },
 ];
 
 const SOCIAL_ACCOUNTS = [
@@ -43,7 +52,17 @@ const SOCIAL_ACCOUNTS = [
   { platform: "YouTube", icon: Video, handle: "New Valor Agency", followers: "2.8K", growth: "+5.4%", color: "#FF0000" },
 ];
 
-export function AgencyLanding() {
+export function AgencyLanding({ onViewChange }: Props) {
+  const router = useRouter();
+
+  const handleAction = (action: typeof QUICK_ACTIONS[0]) => {
+    if (action.action === "navigate" && onViewChange && action.view) {
+      onViewChange(action.view);
+    } else if (action.action === "external" && action.href) {
+      router.push(action.href);
+    }
+  };
+
   return (
     <div>
       {/* Welcome */}
@@ -52,7 +71,7 @@ export function AgencyLanding() {
           Good morning, Admin.
         </h2>
         <p style={{ fontSize: 13, color: "var(--nva-muted)" }}>
-          Here's what's happening across your agency today.
+          13 models on board &mdash; all info sheets complete. View all in <button onClick={() => onViewChange?.("model-management")} style={{ background: "none", border: "none", cursor: "pointer", color: "#d4a853", fontWeight: 700, fontSize: 13 }}>Model Management</button>.
         </p>
       </div>
 
@@ -70,12 +89,12 @@ export function AgencyLanding() {
               style={{ padding: "20px" }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(212,168,83,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: `${s.color || "#d4a853"}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Icon size={16} style={{ color: "var(--nva-gold)" }} />
                 </div>
                 {s.up && (
-                  <span style={{ fontSize: 11, color: "var(--nva-green)", fontWeight: 600, display: "flex", alignItems: "center", gap: 3 }}>
-                    <TrendingUp size={10} /> {s.change}
+                  <span style={{ fontSize: 10, color: "var(--nva-green)", fontWeight: 600, display: "flex", alignItems: "center", gap: 3 }}>
+                    <TrendingUp size={9} /> {s.change}
                   </span>
                 )}
               </div>
@@ -106,6 +125,7 @@ export function AgencyLanding() {
                 key={action.label}
                 whileHover={{ y: -3 }}
                 whileTap={{ scale: 0.97 }}
+                onClick={() => handleAction(action)}
                 style={{
                   padding: "18px 16px",
                   borderRadius: 14,
@@ -116,14 +136,14 @@ export function AgencyLanding() {
                   transition: "all 0.2s",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(212,168,83,0.3)";
-                  e.currentTarget.style.background = "var(--nva-surface-2)";
-                  e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.3)";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(212,168,83,0.3)";
+                  (e.currentTarget as HTMLButtonElement).style.background = "var(--nva-surface-2)";
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 8px 24px rgba(0,0,0,0.3)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "var(--nva-border)";
-                  e.currentTarget.style.background = "var(--nva-surface)";
-                  e.currentTarget.style.boxShadow = "none";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--nva-border)";
+                  (e.currentTarget as HTMLButtonElement).style.background = "var(--nva-surface)";
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = "none";
                 }}
               >
                 <div style={{ width: 36, height: 36, borderRadius: 10, background: `${action.color}18`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
@@ -139,51 +159,38 @@ export function AgencyLanding() {
 
       {/* Bottom grid */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
-        {/* Recent Activity */}
+        {/* Velour Applicants */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25, duration: 0.35 }}
         >
-          <h3 style={{ fontSize: 13, fontWeight: 700, color: "var(--nva-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 14 }}>
-            Recent Activity
-          </h3>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <h3 style={{ fontSize: 13, fontWeight: 700, color: "var(--nva-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              Velour Applicants
+            </h3>
+            <button onClick={() => router.push("/velour")}
+              style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", color: "var(--nva-gold)", fontSize: 11, fontWeight: 600 }}>
+              View site <ChevronRight size={11} />
+            </button>
+          </div>
           <div className="card-nva" style={{ padding: "8px", overflow: "hidden" }}>
-            {RECENT_ACTIVITY.map((item, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "10px 12px",
-                  borderBottom: i < RECENT_ACTIVITY.length - 1 ? "1px solid var(--nva-border)" : "none",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                <div style={{
-                  width: 30, height: 30, borderRadius: "50%",
-                  background: item.type === "chatter" ? "rgba(212,168,83,0.12)" :
-                    item.type === "content" ? "rgba(34,197,94,0.12)" :
-                    item.type === "marketing" ? "rgba(59,130,246,0.12)" :
-                    "rgba(160,120,48,0.12)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0, fontSize: 11, fontWeight: 700,
-                  color: item.type === "chatter" ? "var(--nva-gold)" :
-                    item.type === "content" ? "var(--nva-green)" :
-                    item.type === "marketing" ? "var(--nva-blue)" :
-                    "var(--nva-gold-dark)",
-                }}>
-                  {item.user[0]}
+            {VELOUR_APPLICANTS.map((app, i) => (
+              <div key={i} style={{ padding: "12px", borderBottom: i < VELOUR_APPLICANTS.length - 1 ? "1px solid var(--nva-border)" : "none", display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 38, height: 38, borderRadius: 10, background: "rgba(212,168,83,0.08)", border: "1px solid rgba(212,168,83,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <UserPlus size={15} style={{ color: "var(--nva-gold)" }} />
                 </div>
-                <div style={{ flex: 1, overflow: "hidden" }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "var(--nva-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {item.user}
-                  </div>
-                  <div style={{ fontSize: 11, color: "var(--nva-muted)" }}>{item.action}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--nva-text)" }}>{app.name}</div>
+                  <div style={{ fontSize: 11, color: "var(--nva-muted)" }}>{app.note}</div>
                 </div>
-                <div style={{ fontSize: 10, color: "var(--nva-muted-2)", whiteSpace: "nowrap" }}>{item.time}</div>
               </div>
             ))}
+            <div style={{ padding: "14px 12px", textAlign: "center" }}>
+              <div style={{ fontSize: 11, color: "var(--nva-muted)", lineHeight: 1.6 }}>
+                Share <button onClick={() => router.push("/velour")} style={{ background: "none", border: "none", cursor: "pointer", color: "#d4a853", fontWeight: 600, fontSize: 11 }}>/velour</button> to start receiving chatter and marketing applications.
+              </div>
+            </div>
           </div>
         </motion.div>
 
@@ -193,27 +200,23 @@ export function AgencyLanding() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.35 }}
         >
-          <h3 style={{ fontSize: 13, fontWeight: 700, color: "var(--nva-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 14 }}>
-            Top Performers
-          </h3>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <h3 style={{ fontSize: 13, fontWeight: 700, color: "var(--nva-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              Model Profiles
+            </h3>
+            <button onClick={() => onViewChange?.("model-management")}
+              style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", color: "var(--nva-gold)", fontSize: 11, fontWeight: 600 }}>
+              View all 13 <ChevronRight size={11} />
+            </button>
+          </div>
           <div className="card-nva" style={{ padding: "8px", overflow: "hidden" }}>
             {TOP_PERFORMERS.map((p, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "12px",
-                  borderBottom: i < TOP_PERFORMERS.length - 1 ? "1px solid var(--nva-border)" : "none",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                }}
-              >
+              <div key={i} style={{ padding: "10px 12px", borderBottom: i < TOP_PERFORMERS.length - 1 ? "1px solid var(--nva-border)" : "none", display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{
-                  width: 38, height: 38, borderRadius: 10,
-                  background: "linear-gradient(135deg, rgba(212,168,83,0.2), rgba(240,201,122,0.15))",
-                  border: "1px solid rgba(212,168,83,0.2)",
+                  width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                  background: `linear-gradient(135deg, ${p.color}, ${p.color}60)`,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontWeight: 800, fontSize: 14, color: "var(--nva-gold)", flexShrink: 0,
+                  fontWeight: 900, fontSize: 12, color: "#0a0a0f",
                 }}>
                   {p.avatar}
                 </div>
@@ -222,7 +225,7 @@ export function AgencyLanding() {
                   <div style={{ fontSize: 10, color: "var(--nva-muted)" }}>{p.type}</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: "var(--nva-gold)" }}>{p.metric}</div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: "var(--nva-gold)" }}>{p.metric}</div>
                   <div style={{ fontSize: 10, color: "var(--nva-muted)" }}>{p.metricLabel}</div>
                 </div>
               </div>
