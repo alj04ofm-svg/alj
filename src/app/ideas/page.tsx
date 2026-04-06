@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Sparkles, Wand2, Send, Plus, X, Check, Edit3, ArrowRight,
+  Sparkles, Wand2, Send, Plus, X, Check, Edit3, ArrowRight, CheckCircle,
   Loader2, RefreshCw, MessageSquare, Camera, Type, Hash, Film, Star,
   FolderOpen,
 } from "lucide-react";
