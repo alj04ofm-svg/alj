@@ -352,6 +352,7 @@ function BriefDetail({
   onSend: () => void;
   onDelete: () => void;
 }) {
+  const isSent = brief.status === "sent";
   return (
     <motion.div
       key={brief.id}
