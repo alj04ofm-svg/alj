@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
   Users, MessageSquare, Megaphone, FolderOpen, Clock, BarChart3,
   TrendingUp, DollarSign, Star, ArrowUpRight, Zap, CheckCircle2,
-  Instagram, Twitter, Youtube
+  Globe, Radio, Video
 } from "lucide-react";
 
 const STATS = [
@@ -38,9 +38,9 @@ const TOP_PERFORMERS = [
 ];
 
 const SOCIAL_ACCOUNTS = [
-  { platform: "Instagram", icon: Instagram, handle: "@newvaloragency", followers: "12.4K", growth: "+3.2%", color: "#E1306C" },
-  { platform: "Twitter", icon: Twitter, handle: "@newvaloragency", followers: "4.1K", growth: "+1.8%", color: "#1DA1F2" },
-  { platform: "YouTube", icon: Youtube, handle: "New Valor Agency", followers: "2.8K", growth: "+5.4%", color: "#FF0000" },
+  { platform: "Instagram", icon: Globe, handle: "@newvaloragency", followers: "12.4K", growth: "+3.2%", color: "#E1306C" },
+  { platform: "Twitter", icon: Radio, handle: "@newvaloragency", followers: "4.1K", growth: "+1.8%", color: "#1DA1F2" },
+  { platform: "YouTube", icon: Video, handle: "New Valor Agency", followers: "2.8K", growth: "+5.4%", color: "#FF0000" },
 ];
 
 export function AgencyLanding() {

@@ -173,7 +173,7 @@ function statusStyle(status: ContentItem["status"]) {
 
 function ComposeForm({ onSent }: { onSent: () => void }) {
   const [chatterId, setChatterId] = useState("");
-  const [platform, setPlatform] = useState<"fansly" | "onlyfans">("fansly");
+  const [platform, setPlatform] = useState<"fansly" | "onlyfans" | "both">("fansly");
   const [model, setModel] = useState("");
   const [contentType, setContentType] = useState("reel");
   const [subject, setSubject] = useState("");

@@ -2,15 +2,15 @@
 
 import { motion } from "framer-motion";
 import {
-  BarChart3, TrendingUp, Instagram, Twitter, Youtube,
+  BarChart3, TrendingUp, Globe, Radio, Video,
   Users, Eye, Heart, MessageCircle, Share2, ArrowUpRight,
   ArrowDownRight, ExternalLink, Plus, Filter, RefreshCw
 } from "lucide-react";
 
 const PLATFORMS = [
-  { id: "instagram", label: "Instagram", icon: Instagram, handle: "@newvaloragency", color: "#E1306C", followers: "12.4K", followersChange: "+3.2%", reach: "84.2K", reachChange: "+8.1%" },
-  { id: "twitter", label: "Twitter / X", icon: Twitter, handle: "@newvaloragency", color: "#1DA1F2", followers: "4.1K", followersChange: "+1.8%", reach: "22.8K", reachChange: "+4.3%" },
-  { id: "youtube", label: "YouTube", icon: Youtube, handle: "New Valor Agency", color: "#FF0000", followers: "2.8K", followersChange: "+5.4%", reach: "41.0K", reachChange: "+12.7%" },
+  { id: "instagram", label: "Instagram", icon: Globe, handle: "@newvaloragency", color: "#E1306C", followers: "12.4K", followersChange: "+3.2%", reach: "84.2K", reachChange: "+8.1%" },
+  { id: "twitter", label: "Twitter / X", icon: Radio, handle: "@newvaloragency", color: "#1DA1F2", followers: "4.1K", followersChange: "+1.8%", reach: "22.8K", reachChange: "+4.3%" },
+  { id: "youtube", label: "YouTube", icon: Video, handle: "New Valor Agency", color: "#FF0000", followers: "2.8K", followersChange: "+5.4%", reach: "41.0K", reachChange: "+12.7%" },
 ];
 
 const METRICS = [

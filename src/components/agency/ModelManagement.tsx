@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Users, Plus, Search, Star, TrendingUp, DollarSign,
-  Instagram, MessageCircle, Film, Mail, Phone, ChevronRight,
+  Globe, MessageCircle, Film, Mail, Phone, ChevronRight,
   MoreHorizontal, Filter, UserCheck, Clock, ExternalLink, Edit
 } from "lucide-react";
 
@@ -185,7 +185,7 @@ export function ModelManagement() {
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {model.accounts.map((acc) => (
                   <span key={acc} style={{ padding: "3px 10px", borderRadius: 6, background: "rgba(88,101,242,0.08)", border: "1px solid rgba(88,101,242,0.15)", fontSize: 10, color: "#5865F2", display: "flex", alignItems: "center", gap: 4 }}>
-                    <Instagram size={9} /> {acc}
+                    <Globe size={9} /> {acc}
                   </span>
                 ))}
                 <span style={{ padding: "3px 10px", borderRadius: 6, background: "var(--nva-surface-2)", border: "1px solid var(--nva-border)", fontSize: 10, color: "var(--nva-muted)" }}>
@@ -264,7 +264,7 @@ export function ModelManagement() {
               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 18 }}>
                 {selectedModel.accounts.map(acc => (
                   <div key={acc} style={{ padding: "12px 14px", borderRadius: 10, background: "var(--nva-surface-2)", border: "1px solid var(--nva-border)", display: "flex", alignItems: "center", gap: 10 }}>
-                    <Instagram size={15} style={{ color: "#E1306C" }} />
+                    <Globe size={15} style={{ color: "#E1306C" }} />
                     <span style={{ fontSize: 13, fontWeight: 600, color: "var(--nva-text)", flex: 1 }}>{acc}</span>
                     <button style={{ padding: "5px 10px", borderRadius: 6, background: "rgba(212,168,83,0.08)", border: "1px solid rgba(212,168,83,0.15)", cursor: "pointer", fontSize: 10, color: "var(--nva-gold)", fontWeight: 600 }}>
                       <ExternalLink size={9} style={{ marginRight: 3, display: "inline" }} />

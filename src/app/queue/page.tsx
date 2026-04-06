@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  InstagramIcon as InstagramIconIcon, ListOrdered, Clock, RotateCcw, Copy, Check,
+  ListOrdered, Clock, RotateCcw, Copy, Check, Globe,
   ChevronRight, Zap, Filter, Calendar, TrendingUp,
   MessageSquare, Hash, Star, AlertCircle,
 } from "lucide-react";
@@ -279,7 +279,7 @@ export default function QueuePage() {
           {/* Creator Studio CTA */}
           {activeTab === "rotor" && (
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mb-5 flex items-center gap-3 px-5 py-4 rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(255,0,105,0.08), rgba(131,58,180,0.08))", border: "1px solid rgba(255,0,105,0.15)" }}>
-              <InstagramIcon className="w-5 h-5 flex-shrink-0" style={{ color: "#ff0069" }} />
+              <Globe className="w-5 h-5 flex-shrink-0" style={{ color: "#ff0069" }} />
               <div>
                 <p className="text-sm font-semibold text-white">Post via Creator Studio</p>
                 <p className="text-xs mt-0.5" style={{ color: "#a8a8a8" }}>
