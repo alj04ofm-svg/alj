@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import {
   Users2, CheckCircle, Clock, Film, ChevronRight,
   ExternalLink, Loader2, RefreshCw, Play, MessageSquare,
-  Send, Star, Zap, Heart, Dumbbell,
+  Send, Star, Zap, Heart, Dumbbell, ArrowRight,
 } from "lucide-react";
 
 // ── Status config ─────────────────────────────────────────────────────────────
@@ -399,6 +399,17 @@ export default function ModelsPage() {
                       </motion.div>
                     ))}
                   </AnimatePresence>
+
+                  {/* Next Section CTA */}
+                  <button
+                    onClick={() => window.location.href = "/approvals"}
+                    className="w-full py-2.5 rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-2 transition-all hover:brightness-110 mt-4"
+                    style={{ background: "linear-gradient(135deg, #833ab4, #ff0069)" }}
+                  >
+                    <ArrowRight className="w-3.5 h-3.5" />
+                    Next Section
+                    <span style={{ color: "#ccc", fontWeight: 400 }}>Approvals</span>
+                  </button>
                 </div>
               )}
             </div>

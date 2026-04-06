@@ -569,6 +569,15 @@ export default function ContentPage() {
                       <p className="text-[11px]" style={{ color: "#a8a8a8" }}>{clips.length} clip{clips.length !== 1 ? "s" : ""} ready for editing.</p>
                     </div>
                   </motion.div>
+                  <button
+                    onClick={() => window.location.href = "/models"}
+                    className="w-full py-2.5 rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-2 transition-all hover:brightness-110"
+                    style={{ background: "linear-gradient(135deg, #833ab4, #ff0069)" }}
+                  >
+                    Next Section
+                    <ArrowRight className="w-3.5 h-3.5" />
+                    <span style={{ color: "#ccc", fontWeight: 400 }}>Models</span>
+                  </button>
                 )}
               </motion.div>
             </div>
