@@ -273,6 +273,54 @@ export default function AnalyticsPage() {
           </div>
           <div className="relative z-10 flex items-center gap-3">
             <button
+              onClick={() => {
+                const date = new Date().toISOString().split("T")[0];
+                const rows: string[][] = [
+                  ["IGINFULL Analytics Report", ""],
+                  ["Generated", date],
+                  [],
+                  ["Account Overview", ""],
+                  ["Handle", "@abg.ricebunny"],
+                  ["Followers", "5340"],
+                  ["Following", "847"],
+                  ["Posts", "124"],
+                  ["Engagement Rate", "4.7%"],
+                  [],
+                  ["Average Metrics", ""],
+                  ["Avg Likes", "248"],
+                  ["Avg Comments", "31"],
+                  ["Avg Saves", "19"],
+                  ["Avg Reach", "1840"],
+                  [],
+                  ["Top Posts", ""],
+                  ["Caption", "Likes", "Comments", "Saves", "Reach", "Posted"],
+                  ...TOP_POSTS.map(p => [p.caption, String(p.likes), String(p.comments), String(p.saves), String(p.reach), p.posted]),
+                  [],
+                  ["Weekly Engagement Rate", ""],
+                  ["Week", "Rate"],
+                  ...ENGAGEMENT_DATA.map(d => [d.week, `${d.rate}%`]),
+                  [],
+                  ["Follower Growth (Monthly)", ""],
+                  ["Month", "Followers"],
+                  ...FOLLOWER_GROWTH_DATA.map(d => [d.label, String(d.value)]),
+                  [],
+                  ["Audience Insights", ""],
+                  ["Top Locations", ""],
+                  ["City", "Percentage"],
+                  ...AUDIENCE_LOCATIONS.map(l => [l.city, `${l.pct}%`]),
+                  ["Top Age Range", "25-34 (47%)"],
+                  ["Gender Split", "Male 78% / Female 22%"],
+                  ["Active Hours", "8-11am, 7-10pm"],
+                ];
+                const csv = rows.map(r => r.map(cell => `"${cell}"`).join(",")).join("\n");
+                const blob = new Blob([csv], { type: "text/csv" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `iginfull-analytics-${date}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
               className="btn-glitch flex items-center gap-2 px-4 py-2 rounded-xl border border-subtle text-muted-foreground hover:text-white hover:border-white/20 transition-all text-sm"
               data-text="Export Report"
             >
