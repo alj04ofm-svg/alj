@@ -4,5 +4,8 @@ export { ChatterOnboarding } from "./ChatterOnboarding";
 export { MarketingOnboarding } from "./MarketingOnboarding";
 export { ModelRequests } from "./ModelRequests";
 export { NVTimeBot } from "./NVTimeBot";
+export { ShiftTracker } from "./ShiftTracker";
+export { ContentToModels } from "./ContentToModels";
 export { AgencyAnalytics } from "./AgencyAnalytics";
 export { ModelManagement } from "./ModelManagement";
+export { AgencySchedule } from "./AgencySchedule";

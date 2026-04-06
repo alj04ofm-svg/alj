@@ -6,24 +6,28 @@ import {
   LayoutDashboard, Users, MessageSquare, Megaphone, Clock,
   BarChart3, FolderOpen, ChevronLeft, ChevronRight,
   Shield, LogOut, Settings, Bell, Search, User,
-  Zap, HelpCircle
+  Zap, HelpCircle, Calendar
 } from "lucide-react";
 
 export type AgencyView =
   | "landing"
+  | "schedule"
   | "chatter-onboarding"
   | "marketing-onboarding"
   | "model-requests"
-  | "time-tracking"
+  | "shift-tracking"
+  | "content-to-models"
   | "analytics"
   | "model-management";
 
 const NAV_ITEMS: { id: AgencyView; label: string; icon: React.ElementType; badge?: string }[] = [
   { id: "landing", label: "Overview", icon: LayoutDashboard },
-  { id: "chatter-onboarding", label: "Chatter Onboarding", icon: MessageSquare, badge: "New" },
-  { id: "marketing-onboarding", label: "Marketing Onboarding", icon: Megaphone, badge: "New" },
+  { id: "schedule", label: "Schedule", icon: Calendar },
+  { id: "shift-tracking", label: "Shift Tracking", icon: Clock, badge: "Live" },
+  { id: "content-to-models", label: "Content ↔ Models", icon: MessageSquare },
+  { id: "chatter-onboarding", label: "Chatter Onboarding", icon: MessageSquare },
+  { id: "marketing-onboarding", label: "Marketing Onboarding", icon: Megaphone },
   { id: "model-requests", label: "Model Requests", icon: FolderOpen },
-  { id: "time-tracking", label: "NV Time Bot", icon: Clock },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "model-management", label: "Model Management", icon: Users },
 ];
