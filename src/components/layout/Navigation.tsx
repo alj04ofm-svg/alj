@@ -23,6 +23,7 @@ const moreLinks = [
   { label: "Approvals", href: "/approvals" },
   { label: "Team", href: "/team" },
   { label: "Settings", href: "/settings" },
+  { label: "Agency Platform", href: "/agency" },
 ];
 
 export function Navigation() {
@@ -142,6 +143,20 @@ export function Navigation() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
+          <Link
+            href="/agency"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:text-white hover:bg-white/5"
+            style={{ color: "var(--nva-gold, #d4a853)" }}
+          >
+            <span style={{
+              width: 18, height: 18, borderRadius: 5,
+              background: "linear-gradient(135deg, #d4a853, #a07830)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontWeight: 900, fontSize: 8, color: "#0a0a0f", flexShrink: 0,
+            }}>NV</span>
+            Agency
+          </Link>
+
           <Link
             href="/schedule"
             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:text-white hover:bg-white/5"

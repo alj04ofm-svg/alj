@@ -12,11 +12,9 @@ import {
 export type AgencyView =
   | "landing"
   | "schedule"
-  | "chatter-onboarding"
-  | "marketing-onboarding"
-  | "model-requests"
   | "shift-tracking"
   | "content-to-models"
+  | "model-requests"
   | "analytics"
   | "model-management";
 
@@ -25,8 +23,6 @@ const NAV_ITEMS: { id: AgencyView; label: string; icon: React.ElementType; badge
   { id: "schedule", label: "Schedule", icon: Calendar },
   { id: "shift-tracking", label: "Shift Tracking", icon: Clock, badge: "Live" },
   { id: "content-to-models", label: "Content ↔ Models", icon: MessageSquare },
-  { id: "chatter-onboarding", label: "Chatter Onboarding", icon: MessageSquare },
-  { id: "marketing-onboarding", label: "Marketing Onboarding", icon: Megaphone },
   { id: "model-requests", label: "Model Requests", icon: FolderOpen },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "model-management", label: "Model Management", icon: Users },

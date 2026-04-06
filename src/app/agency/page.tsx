@@ -5,8 +5,6 @@ import {
   AgencyDashboardLayout,
   AgencyLanding,
   AgencySchedule,
-  ChatterOnboarding,
-  MarketingOnboarding,
   ModelRequests,
   ShiftTracker,
   ContentToModels,
@@ -23,11 +21,9 @@ export default function AgencyPage() {
       <AgencyDashboardLayout activeView={agencyView} onViewChange={setAgencyView}>
         {agencyView === "landing" && <AgencyLanding />}
         {agencyView === "schedule" && <AgencySchedule />}
-        {agencyView === "chatter-onboarding" && <ChatterOnboarding />}
-        {agencyView === "marketing-onboarding" && <MarketingOnboarding />}
-        {agencyView === "model-requests" && <ModelRequests />}
         {agencyView === "shift-tracking" && <ShiftTracker />}
         {agencyView === "content-to-models" && <ContentToModels />}
+        {agencyView === "model-requests" && <ModelRequests />}
         {agencyView === "analytics" && <AgencyAnalytics />}
         {agencyView === "model-management" && <ModelManagement />}
       </AgencyDashboardLayout>
