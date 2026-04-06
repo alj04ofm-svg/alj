@@ -130,7 +130,7 @@ function ProfileTab() {
               {"setValue" in field ? (
                 <input
                   value={field.value}
-                  onChange={e => field.setValue(e.target.value)}
+                  onChange={e => field.setValue?.(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg text-sm text-white outline-none"
                   style={{ backgroundColor: "#1e1e1e", border: "1px solid rgba(255,255,255,0.08)" }}
                 />

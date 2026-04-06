@@ -558,6 +558,7 @@ export default function ContentPage() {
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 ) : (
+                  <>
                   <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
                     className="p-4 rounded-xl flex items-center gap-3"
                     style={{ backgroundColor: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)" }}>
@@ -578,6 +579,7 @@ export default function ContentPage() {
                     <ArrowRight className="w-3.5 h-3.5" />
                     <span style={{ color: "#ccc", fontWeight: 400 }}>Models</span>
                   </button>
+                  </>
                 )}
               </motion.div>
             </div>
